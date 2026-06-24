@@ -1,20 +1,29 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#D2122E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>مولّد تقارير الميدان — وﻻية الجزائر</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
+    darkMode: 'class',
     theme: {
       extend: {
         colors: {
-          ink:'#0A0C0F',surface:'#13171C',surface2:'#1B2128',
-          line:'#262D36',muted:'#8B94A3',
+          ink: 'var(--color-ink)', surface: 'var(--color-surface)', surface2: 'var(--color-surface2)',
+          line: 'var(--color-line)', muted: 'var(--color-muted)', textMain: 'var(--color-text)',
           dz:{red:'#D2122E',redD:'#A30E24',green:'#0E8345',gold:'#E8B948'}
         },
         fontFamily:{cairo:['Cairo','sans-serif'],mono:['JetBrains Mono','monospace']}
@@ -22,37 +31,61 @@
     }
   };
 </script>
+
 <style>
+  :root {
+    /* Mode Clair */
+    --color-ink: #f8fafc;
+    --color-surface: #ffffff;
+    --color-surface2: #f1f5f9;
+    --color-line: #e2e8f0;
+    --color-muted: #64748b;
+    --color-text: #0f172a;
+  }
+  .dark {
+    /* Mode Sombre */
+    --color-ink: #0A0C0F;
+    --color-surface: #13171C;
+    --color-surface2: #1B2128;
+    --color-line: #262D36;
+    --color-muted: #8B94A3;
+    --color-text: #EDEFF2;
+  }
+  
   *{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
-  body{font-family:'Cairo',sans-serif;background:#0A0C0F}
+  body{font-family:'Cairo',sans-serif; background:var(--color-ink); color:var(--color-text); transition:background 0.3s, color 0.3s;}
   ::-webkit-scrollbar{width:8px;height:8px}
-  ::-webkit-scrollbar-track{background:#10141a}
-  ::-webkit-scrollbar-thumb{background:#2a323c;border-radius:8px}
+  ::-webkit-scrollbar-track{background:var(--color-ink)}
+  ::-webkit-scrollbar-thumb{background:var(--color-line);border-radius:8px}
+  
   .stamp-ring{box-shadow:0 0 0 1px rgba(210,18,46,.35),0 0 0 6px rgba(210,18,46,.06)}
   .dash-zone{
     background-image:
-      repeating-linear-gradient(90deg,#2a323c,#2a323c 6px,transparent 6px,transparent 14px),
-      repeating-linear-gradient(90deg,#2a323c,#2a323c 6px,transparent 6px,transparent 14px),
-      repeating-linear-gradient(0deg,#2a323c,#2a323c 6px,transparent 6px,transparent 14px),
-      repeating-linear-gradient(0deg,#2a323c,#2a323c 6px,transparent 6px,transparent 14px);
+      repeating-linear-gradient(90deg,var(--color-line),var(--color-line) 6px,transparent 6px,transparent 14px),
+      repeating-linear-gradient(90deg,var(--color-line),var(--color-line) 6px,transparent 6px,transparent 14px),
+      repeating-linear-gradient(0deg,var(--color-line),var(--color-line) 6px,transparent 6px,transparent 14px),
+      repeating-linear-gradient(0deg,var(--color-line),var(--color-line) 6px,transparent 6px,transparent 14px);
     background-size:100% 2px,100% 2px,2px 100%,2px 100%;
     background-position:0 0,0 100%,0 0,100% 0;
     background-repeat:no-repeat
   }
+  
   @keyframes pulse-live{0%,100%{opacity:1}50%{opacity:.35}}
   .live-dot{animation:pulse-live 1.6s ease-in-out infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
   .spin{animation:spin .8s linear infinite}
   @keyframes gps-ring{0%{box-shadow:0 0 0 0 rgba(14,131,69,.5)}70%{box-shadow:0 0 0 10px rgba(14,131,69,0)}100%{box-shadow:0 0 0 0 rgba(14,131,69,0)}}
   .gps-pulse{animation:gps-ring 1.2s ease-out infinite}
-  input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.75}
+  
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(0.5);opacity:.75}
+  .dark input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(1);}
   textarea:focus,input:focus,select:focus{outline:none;box-shadow:0 0 0 2px rgba(210,18,46,.45)}
   input[type="range"]{accent-color:#D2122E}
   canvas{image-rendering:auto}
   .copy-btn.copied{color:#0E8345!important;border-color:rgba(14,131,69,.4)!important}
 </style>
 </head>
-<body class="text-[#EDEFF2] min-h-screen pb-24 lg:pb-10">
+<body class="text-textMain min-h-screen pb-24 lg:pb-10">
 
 <header class="border-b border-line bg-surface/80 backdrop-blur sticky top-0 z-30">
   <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3.5 flex items-center gap-3">
@@ -66,8 +99,13 @@
       <h1 class="text-[15px] sm:text-base font-extrabold tracking-tight">مولّد تقارير الميدان</h1>
       <p class="text-[11px] sm:text-xs text-muted font-mono" dir="ltr">Wilaya d'Alger · Contrôle de voirie</p>
     </div>
-    <div class="ms-auto hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-muted" dir="ltr">
-      <span class="w-1.5 h-1.5 rounded-full bg-dz-green live-dot"></span> Mode hors-ligne
+    <div class="ms-auto flex items-center gap-3">
+      <div class="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-muted" dir="ltr">
+        <span class="w-1.5 h-1.5 rounded-full bg-dz-green live-dot"></span> PWA Ready
+      </div>
+      <button id="themeToggle" class="w-8 h-8 rounded-full bg-surface2 border border-line flex items-center justify-center hover:border-dz-red/40 transition text-sm">
+        🌓
+      </button>
     </div>
   </div>
 </header>
@@ -75,15 +113,14 @@
 <main class="max-w-7xl mx-auto px-4 lg:px-8 py-6 grid lg:grid-cols-[460px_1fr] gap-6 items-start">
 
   <section class="space-y-5">
-
-    <div class="bg-surface border border-line rounded-2xl p-4 sm:p-5">
+    <div class="bg-surface border border-line rounded-2xl p-4 sm:p-5 shadow-sm">
       <div class="flex items-center gap-2.5 mb-4">
         <span class="w-7 h-7 rounded-full border border-dz-red/50 text-dz-red text-xs font-mono font-bold flex items-center justify-center">01</span>
         <h2 class="font-bold text-sm" dir="auto">الصور <span class="text-muted font-normal">— حتى 4 صور</span></h2>
       </div>
       <div class="grid grid-cols-2 gap-2 mb-3">
         <label class="dash-zone rounded-xl flex flex-col items-center justify-center gap-1.5 py-5 cursor-pointer hover:bg-surface2/60 transition">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8B94A3" stroke-width="1.6">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-muted)" stroke-width="1.6">
             <path d="M12 16V4m0 0L7 9m5-5 5 5"/>
             <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
           </svg>
@@ -91,7 +128,7 @@
           <input id="fileInput" type="file" accept="image/*" multiple class="hidden">
         </label>
         <label class="dash-zone rounded-xl flex flex-col items-center justify-center gap-1.5 py-5 cursor-pointer hover:bg-surface2/60 transition">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8B94A3" stroke-width="1.6">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-muted)" stroke-width="1.6">
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
             <circle cx="12" cy="13" r="4"/>
           </svg>
@@ -102,7 +139,7 @@
       <div id="thumbs" class="grid grid-cols-4 gap-2"></div>
     </div>
 
-    <div class="bg-surface border border-line rounded-2xl p-4 sm:p-5 space-y-4">
+    <div class="bg-surface border border-line rounded-2xl p-4 sm:p-5 space-y-4 shadow-sm">
       <div class="flex items-center gap-2.5">
         <span class="w-7 h-7 rounded-full border border-dz-red/50 text-dz-red text-xs font-mono font-bold flex items-center justify-center">02</span>
         <h2 class="font-bold text-sm" dir="auto">معلومات التقرير</h2>
@@ -111,7 +148,7 @@
       <div>
         <label class="block text-[11px] text-muted mb-1.5 font-mono" dir="ltr">DATE & HEURE</label>
         <div class="flex gap-2">
-          <input id="datetimeInput" type="datetime-local" dir="ltr" class="flex-1 bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm font-mono">
+          <input id="datetimeInput" type="datetime-local" dir="ltr" class="flex-1 bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm font-mono text-textMain">
           <button id="nowBtn" type="button" class="px-3.5 rounded-lg bg-dz-green/15 text-dz-green text-xs font-bold border border-dz-green/30 hover:bg-dz-green/25 transition whitespace-nowrap" dir="auto">الآن</button>
         </div>
       </div>
@@ -119,7 +156,7 @@
       <div>
         <div class="flex items-center justify-between mb-1.5">
           <label class="text-[11px] text-muted font-mono" dir="ltr">LOCALISATION (TEXTE)</label>
-          <button id="copyLocBtn" type="button" class="copy-btn flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface2 border border-line text-muted text-[11px] font-bold hover:text-white hover:border-dz-red/40 transition">
+          <button id="copyLocBtn" type="button" class="copy-btn flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface2 border border-line text-muted text-[11px] font-bold hover:text-textMain hover:border-dz-red/40 transition">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <rect x="9" y="9" width="13" height="13" rx="2"/>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
@@ -127,7 +164,7 @@
             <span>نسخ</span>
           </button>
         </div>
-        <input id="locationInput" dir="auto" placeholder="طريق السبالة، أمام المؤسسة الاستشفائية، مرباح..." class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm">
+        <input id="locationInput" dir="auto" placeholder="طريق السبالة، أمام المؤسسة الاستشفائية، مرباح..." class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm text-textMain">
       </div>
 
       <div class="bg-surface2/50 border border-line rounded-xl p-4 space-y-3">
@@ -147,22 +184,24 @@
           <span id="gpsBtnTxt">تحديد الموقع الحالي عبر GPS</span>
         </button>
 
+        <div id="mapContainer" class="hidden h-48 w-full rounded-xl border border-line z-10 relative overflow-hidden"></div>
+
         <div class="bg-surface border border-line rounded-xl p-3 space-y-3">
           <div class="grid grid-cols-2 gap-2 text-center">
             <div class="bg-surface2/70 border border-line/60 rounded-lg p-2">
               <span class="block text-[10px] text-muted font-mono tracking-wider">LATITUDE</span>
-              <span id="latDisplay" class="text-xs font-mono font-bold text-[#EDEFF2]">—</span>
+              <span id="latDisplay" class="text-xs font-mono font-bold text-textMain">—</span>
             </div>
             <div class="bg-surface2/70 border border-line/60 rounded-lg p-2">
               <span class="block text-[10px] text-muted font-mono tracking-wider">LONGITUDE</span>
-              <span id="lngDisplay" class="text-xs font-mono font-bold text-[#EDEFF2]">—</span>
+              <span id="lngDisplay" class="text-xs font-mono font-bold text-textMain">—</span>
             </div>
           </div>
 
           <div class="space-y-1">
             <div class="flex items-center justify-between">
               <span class="text-[10px] text-muted font-mono">LIEN GOOGLE MAPS</span>
-              <button id="copyGpsPanelBtn" type="button" class="copy-btn flex items-center gap-1 px-2 py-0.5 rounded bg-surface2 border border-line text-muted text-[10px] font-bold hover:text-white transition">
+              <button id="copyGpsPanelBtn" type="button" class="copy-btn flex items-center gap-1 px-2 py-0.5 rounded bg-surface2 border border-line text-muted text-[10px] font-bold hover:text-textMain transition">
                 <span>نسخ الرابط</span>
               </button>
             </div>
@@ -176,7 +215,7 @@
       <div>
         <div class="flex items-center justify-between mb-1.5">
           <label class="text-[11px] text-muted font-mono" dir="ltr">وصف الخلل / التقرير</label>
-          <button id="copyReportBtn" type="button" class="copy-btn flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface2 border border-line text-muted text-[11px] font-bold hover:text-white hover:border-dz-red/40 transition">
+          <button id="copyReportBtn" type="button" class="copy-btn flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface2 border border-line text-muted text-[11px] font-bold hover:text-textMain hover:border-dz-red/40 transition">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <rect x="9" y="9" width="13" height="13" rx="2"/>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
@@ -184,13 +223,13 @@
             <span>نسخ</span>
           </button>
         </div>
-        <textarea id="reportInput" dir="rtl" lang="ar" rows="3" placeholder="نقص في عملية الكنس داخل الملعب..." class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed"></textarea>
+        <textarea id="reportInput" dir="rtl" lang="ar" rows="3" placeholder="نقص في عملية الكنس داخل الملعب..." class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed text-textMain"></textarea>
       </div>
 
       <div class="grid grid-cols-2 gap-3 pt-1">
         <div>
           <label class="block text-[11px] text-muted mb-1.5 font-mono" dir="ltr">الصيغة</label>
-          <select id="formatSelect" dir="ltr" class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm">
+          <select id="formatSelect" dir="ltr" class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm text-textMain">
             <option value="jpeg">JPEG</option>
             <option value="png">PNG</option>
           </select>
@@ -204,7 +243,7 @@
   </section>
 
   <section class="lg:sticky lg:top-[76px] space-y-4">
-    <div class="bg-surface border border-line rounded-2xl p-4 sm:p-5">
+    <div class="bg-surface border border-line rounded-2xl p-4 sm:p-5 shadow-sm">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2.5">
           <span class="w-7 h-7 rounded-full border border-dz-red/50 text-dz-red text-xs font-mono font-bold flex items-center justify-center">03</span>
@@ -215,7 +254,7 @@
         </span>
       </div>
 
-      <div class="rounded-xl overflow-hidden border border-line bg-black/40 flex items-center justify-center min-h-[260px] mx-auto max-w-[560px]">
+      <div class="rounded-xl overflow-hidden border border-line bg-black/10 dark:bg-black/40 flex items-center justify-center min-h-[260px] mx-auto max-w-[560px]">
         <canvas id="reportCanvas" class="max-w-full h-auto block"></canvas>
       </div>
 
@@ -229,14 +268,14 @@
           تحميل
         </button>
         <button id="waBtn" disabled type="button"
-          class="flex-1 disabled:opacity-40 disabled:cursor-not-allowed text-[#25D366] border border-[#25D366]/35 bg-[#25D366]/10 font-bold text-sm rounded-lg py-3 hover:bg-[#25D366]/20 transition flex items-center justify-center gap-2" dir="auto">
+          class="flex-1 disabled:opacity-40 disabled:cursor-not-allowed text-[#25D366] border border-[#25D366]/35 bg-surface2 font-bold text-sm rounded-lg py-3 hover:bg-[#25D366]/10 transition flex items-center justify-center gap-2" dir="auto">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
           </svg>
           واتساب
         </button>
         <button id="resetBtn" type="button"
-          class="px-4 rounded-lg border border-line text-muted text-sm font-bold hover:text-white hover:border-dz-red/40 transition" dir="auto">↺</button>
+          class="px-4 rounded-lg border border-line text-muted text-sm font-bold hover:text-textMain hover:border-dz-red/40 transition" dir="auto">↺</button>
       </div>
       <p class="text-[11px] text-muted font-mono mt-2 text-center" id="dimsLabel" dir="ltr">—</p>
     </div>
@@ -254,7 +293,7 @@
       تحميل
     </button>
     <button id="waBtnMobile" disabled type="button"
-      class="flex-1 disabled:opacity-40 disabled:cursor-not-allowed text-[#25D366] border border-[#25D366]/35 bg-[#25D366]/10 font-bold text-sm rounded-lg py-3.5 flex items-center justify-center gap-2" dir="auto">
+      class="flex-1 disabled:opacity-40 disabled:cursor-not-allowed text-[#25D366] border border-[#25D366]/35 bg-surface2 font-bold text-sm rounded-lg py-3.5 flex items-center justify-center gap-2" dir="auto">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
       </svg>
@@ -281,6 +320,7 @@ const canvas=$('reportCanvas');
 const downloadBtn=$('downloadBtn'), downloadBtnMobile=$('downloadBtnMobile');
 const waBtn=$('waBtn'), waBtnMobile=$('waBtnMobile');
 const resetBtn=$('resetBtn'), dimsLabel=$('dimsLabel');
+const themeToggle=$('themeToggle');
 
 const pad2=n=>String(n).padStart(2,'0');
 const uid=()=>'id-'+Math.random().toString(36).slice(2)+Date.now().toString(36);
@@ -289,26 +329,33 @@ const FR_M=['janvier','février','mars','avril','mai','juin','juillet','août','
 function fmtDate(d){ return `${pad2(d.getDate())} ${FR_M[d.getMonth()]} ${d.getFullYear()}   ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; }
 function toInput(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
 
+/* ---- Theme Toggle ---- */
+themeToggle.addEventListener('click', () => {
+  document.documentElement.classList.toggle('dark');
+  const isDark = document.documentElement.classList.contains('dark');
+  toast(isDark ? 'Mode sombre activé' : 'Mode clair activé', isDark ? '#1B2128' : '#e2e8f0', isDark ? '#fff' : '#0f172a');
+});
+
 /* ---- toast ---- */
-function toast(msg,bg='#1B2128'){
+function toast(msg, bg=document.documentElement.classList.contains('dark')?'#1B2128':'#e2e8f0', text=document.documentElement.classList.contains('dark')?'#fff':'#0f172a'){
   const el=document.createElement('div');
   el.textContent=msg; el.setAttribute('dir','auto');
-  el.style.background=bg;
-  el.className='fixed top-4 left-1/2 -translate-x-1/2 z-[9999] border border-[#3a4452] text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-xl transition-opacity duration-300';
+  el.style.background=bg; el.style.color=text;
+  el.className='fixed top-4 left-1/2 -translate-x-1/2 z-[9999] border border-line text-xs font-bold px-4 py-2.5 rounded-full shadow-xl transition-opacity duration-300';
   document.body.appendChild(el);
   setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),300)},2400);
 }
 
 /* ---- copier ---- */
 function clip(text,btn){
-  if(!text || text === '—'){toast('لا يوجد نص نسخ');return;}
+  if(!text || text === '—'){toast('لا يوجد نص لنسخه');return;}
   navigator.clipboard.writeText(text).then(()=>{
     btn.classList.add('copied');
     const span=btn.querySelector('span')||btn;
     const prev=span.textContent;
     span.textContent='✓ تم';
     setTimeout(()=>{btn.classList.remove('copied');span.textContent=prev;},1800);
-    toast('✓ تم النسخ','#0E4D2A');
+    toast('✓ تم النسخ بنجاح', '#0E4D2A', '#fff');
   }).catch(()=>toast('تعذر النسخ تلقائياً'));
 }
 
@@ -350,7 +397,10 @@ function ensureLoaded(){
   }));
 }
 
-/* ---- GPS ---- */
+/* ---- GPS & Leaflet Map ---- */
+let map = null;
+let mapMarker = null;
+
 gpsBtn.addEventListener('click',()=>{
   if(!navigator.geolocation){toast('المتصفح لا يدعم تحديد الموقع');return;}
   gpsBtn.disabled=true; gpsIcon.classList.add('spin'); gpsBtnTxt.textContent = 'جاري الاتصال بالأقمار...';
@@ -363,8 +413,23 @@ gpsBtn.addEventListener('click',()=>{
       latDisplay.textContent = lat;
       lngDisplay.textContent = lng;
       
-      const url=`https://maps.google.com/?q=${lat},${lng}`;
+      const url=`https://maps.google.com/?q=$${lat},${lng}`;
       gpsLinkDisplay.textContent = url;
+      
+      const mapDiv = $('mapContainer');
+      mapDiv.classList.remove('hidden');
+      
+      if (!map) {
+        map = L.map('mapContainer').setView([lat, lng], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap'
+        }).addTo(map);
+        mapMarker = L.marker([lat, lng]).addTo(map);
+      } else {
+        map.setView([lat, lng], 16);
+        mapMarker.setLatLng([lat, lng]);
+      }
       
       gpsBtnTxt.textContent='تحديث إحداثيات GPS';
       if(!state.location){
@@ -372,7 +437,7 @@ gpsBtn.addEventListener('click',()=>{
         state.location=locationInput.value;
         scheduleRedraw();
       }
-      toast(`📍 تم تحديد الإحداثيات تم بنجاح`,'#0E8345');
+      toast(`📍 تم تحديد الإحداثيات بنجاح`, '#0E8345', '#fff');
     },
     err=>{
       gpsBtn.disabled=false; gpsIcon.classList.remove('spin'); gpsBtnTxt.textContent='تحديد الموقع الحالي عبر GPS';
@@ -384,7 +449,7 @@ gpsBtn.addEventListener('click',()=>{
 
 copyGpsPanelBtn.addEventListener('click',()=>{
   if(state.gps) {
-    clip(`https://maps.google.com/?q=${state.gps.lat},${state.gps.lng}`, copyGpsPanelBtn);
+    clip(`https://maps.google.com/?q=$${state.gps.lat},${state.gps.lng}`, copyGpsPanelBtn);
   } else {
     toast('الرجاء سحب إحداثيات GPS أولاً');
   }
@@ -393,7 +458,7 @@ copyGpsPanelBtn.addEventListener('click',()=>{
 /* ---- copy loc / report ---- */
 copyLocBtn.addEventListener('click',()=>{
   let t=state.location;
-  if(state.gps) t+=`\nhttps://maps.google.com/?q=${state.gps.lat},${state.gps.lng}`;
+  if(state.gps) t+=`\nhttps://maps.google.com/?q=$${state.gps.lat},${state.gps.lng}`;
   clip(t,copyLocBtn);
 });
 copyReportBtn.addEventListener('click',()=>clip(state.report,copyReportBtn));
@@ -411,7 +476,7 @@ function drawGrid(ctx,imgs,W,H){
     ctx.fillStyle='#1B2128';ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#5b6573';ctx.direction='rtl';ctx.font='600 30px Cairo,sans-serif';
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('أضف صورة واحدة على الأقل المعاينة التلقائية',W/2,H/2);return;
+    ctx.fillText('أضف صورة واحدة على الأقل للمعاينة',W/2,H/2);return;
   }
   const g=6;
   if(imgs.length===1){cover(ctx,imgs[0],0,0,W,H,0);}
@@ -488,7 +553,7 @@ async function download(){
     a.href=URL.createObjectURL(blob);
     document.body.appendChild(a);a.click();a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-    toast('✓ تم حفظ الصورة في المعرض','#0E8345');
+    toast('✓ تم حفظ الصورة', '#0E8345', '#fff');
   },mime,q);
 }
 
@@ -499,14 +564,13 @@ function buildCaption(){
   const dtStr=`${pad2(d.getDate())} ${FR_S[d.getMonth()]} ${d.getFullYear()} — ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
   let msg=`🗓️ ${dtStr}\n`;
   if(state.location) msg+=`📍 الموقع: ${state.location}\n`;
-  if(state.gps) msg+=`🗺️ https://maps.google.com/?q=${state.gps.lat},${state.gps.lng}\n`;
+  if(state.gps) msg+=`🗺️ https://maps.google.com/?q=$${state.gps.lat},${state.gps.lng}\n`;
   if(state.report) msg+=`\n📋 ${state.report}`;
   return msg.trim();
 }
 function shareWA(){
   if(!state.images.length){toast('أضف صورة واحدة على الأقل');return;}
   window.open(`https://wa.me/?text=${encodeURIComponent(buildCaption())}`, '_blank','noopener,noreferrer');
-  toast('📲 يرجى إرفاق الصورة المصدرة يدوياً داخل محادثة واتساب','#1B2128');
 }
 
 /* ---- listeners ---- */
@@ -524,7 +588,9 @@ resetBtn.addEventListener('click',()=>{
   locationInput.value='';reportInput.value='';
   gpsBtnTxt.textContent='تحديد الموقع الحالي عبر GPS';
   latDisplay.textContent='—';lngDisplay.textContent='—';gpsLinkDisplay.textContent='—';
-  renderThumbs();updateBtns();scheduleRedraw();toast('تمت إعادة ضبط النموذج بالكامل');
+  const mapDiv = $('mapContainer');
+  mapDiv.classList.add('hidden');
+  renderThumbs();updateBtns();scheduleRedraw();toast('تمت إعادة ضبط النموذج');
 });
 downloadBtn.addEventListener('click',download);
 downloadBtnMobile.addEventListener('click',download);
@@ -535,6 +601,45 @@ waBtnMobile.addEventListener('click',shareWA);
 datetimeInput.value=toInput(state.dt);
 updateBtns(); scheduleRedraw();
 if(document.fonts?.ready) document.fonts.ready.then(()=>scheduleRedraw());
+
+/* ---- PWA : Manifest & Service Worker virtuels ---- */
+function initPWA() {
+  const manifest = {
+    name: "مولّد تقارير الميدان",
+    short_name: "التقارير",
+    display: "standalone",
+    start_url: ".",
+    background_color: "#0A0C0F",
+    theme_color: "#D2122E",
+    icons: [{
+      src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D2122E'><circle cx='12' cy='12' r='12'/></svg>",
+      sizes: "192x192",
+      type: "image/svg+xml"
+    }]
+  };
+  const manifestLink = document.createElement('link');
+  manifestLink.rel = 'manifest';
+  manifestLink.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
+  document.head.appendChild(manifestLink);
+
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      const CACHE_NAME = 'dz-rapport-v1';
+      self.addEventListener('install', e => {
+        e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll([location.href])));
+      });
+      self.addEventListener('fetch', e => {
+        e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+      });
+    `;
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    
+    navigator.serviceWorker.register(swUrl).catch(err => console.error("PWA Erreur:", err));
+  }
+}
+initPWA();
+
 })();
 </script>
 </body>

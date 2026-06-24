@@ -7,14 +7,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
     theme: {
       extend: {
         colors: {
-          ink:'#0A0C0F',surface:'#13171C',surface2:'#1B2128',
-          line:'#262D36',muted:'#8B94A3',
+          ink: 'var(--bg-body)',
+          surface: 'var(--bg-surface)',
+          surface2: 'var(--bg-surface2)',
+          line: 'var(--border-line)',
+          muted: 'var(--text-muted)',
+          textMain: 'var(--text-main)',
           dz:{red:'#D2122E',redD:'#A30E24',green:'#0E8345',gold:'#E8B948'}
         },
         fontFamily:{cairo:['Cairo','sans-serif'],mono:['JetBrains Mono','monospace']}
@@ -23,8 +28,26 @@
   };
 </script>
 <style>
+  /* Variables CSS dynamiques pour le mode sombre/clair */
+  :root {
+    --bg-body: #0A0C0F;
+    --bg-surface: #13171C;
+    --bg-surface2: #1B2128;
+    --border-line: #262D36;
+    --text-main: #EDEFF2;
+    --text-muted: #8B94A3;
+  }
+  body.light-mode {
+    --bg-body: #F3F4F6;
+    --bg-surface: #FFFFFF;
+    --bg-surface2: #E5E7EB;
+    --border-line: #D1D5DB;
+    --text-main: #1F2937;
+    --text-muted: #4B5563;
+  }
+
   *{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
-  body{font-family:'Cairo',sans-serif;background:#0A0C0F}
+  body{font-family:'Cairo',sans-serif;background: var(--bg-body); color: var(--text-main); transition: background 0.3s ease, color 0.3s ease;}
   ::-webkit-scrollbar{width:8px;height:8px}
   ::-webkit-scrollbar-track{background:#10141a}
   ::-webkit-scrollbar-thumb{background:#2a323c;border-radius:8px}
@@ -46,13 +69,27 @@
   @keyframes gps-ring{0%{box-shadow:0 0 0 0 rgba(14,131,69,.5)}70%{box-shadow:0 0 0 10px rgba(14,131,69,0)}100%{box-shadow:0 0 0 0 rgba(14,131,69,0)}}
   .gps-pulse{animation:gps-ring 1.2s ease-out infinite}
   input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.75}
+  body.light-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0); opacity: .65; }
   textarea:focus,input:focus,select:focus{outline:none;box-shadow:0 0 0 2px rgba(210,18,46,.45)}
   input[type="range"]{accent-color:#D2122E}
   canvas{image-rendering:auto}
   .copy-btn.copied{color:#0E8345!important;border-color:rgba(14,131,69,.4)!important}
+
+  /* Style de la carte adaptatif au thème */
+  body:not(.light-mode) .leaflet-tile-layer {
+    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+  }
+  body:not(.light-mode) .leaflet-container {
+    background: #13171C !important;
+  }
+  body:not(.light-mode) .leaflet-bar a {
+    background-color: #1B2128 !important;
+    color: #EDEFF2 !important;
+    border-bottom: 1px solid #262D36 !important;
+  }
 </style>
 </head>
-<body class="text-[#EDEFF2] min-h-screen pb-24 lg:pb-10">
+<body class="min-h-screen pb-24 lg:pb-10">
 
 <header class="border-b border-line bg-surface/80 backdrop-blur sticky top-0 z-30">
   <div class="max-w-7xl mx-auto px-4 lg:px-8 py-3.5 flex items-center gap-3">
@@ -66,8 +103,20 @@
       <h1 class="text-[15px] sm:text-base font-extrabold tracking-tight">مولّد تقارير الميدان</h1>
       <p class="text-[11px] sm:text-xs text-muted font-mono" dir="ltr">Wilaya d'Alger · Contrôle de voirie</p>
     </div>
-    <div class="ms-auto hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-muted" dir="ltr">
-      <span class="w-1.5 h-1.5 rounded-full bg-dz-green live-dot"></span> Mode hors-ligne
+    
+    <div class="ms-auto flex items-center gap-3">
+      <div class="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-muted" dir="ltr">
+        <span class="w-1.5 h-1.5 rounded-full bg-dz-green live-dot"></span> Mode hors-ligne
+      </div>
+      <button id="themeToggle" type="button" class="w-9 h-9 rounded-lg bg-surface2 border border-line flex items-center justify-center hover:border-dz-red/40 transition" title="تغيير المظهر">
+        <svg id="themeIcon" class="w-4 h-4 text-dz-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
     </div>
   </div>
 </header>
@@ -127,7 +176,7 @@
             <span>نسخ</span>
           </button>
         </div>
-        <input id="locationInput" dir="auto" placeholder="طريق السبالة، أمام المؤسسة الاستشفائية، مرباح..." class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm">
+        <input id="locationInput" dir="auto" placeholder="طريق السبالة، أمام المؤسسة الاستشفائية، مرباح..." class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm text-textMain">
       </div>
 
       <div class="bg-surface2/50 border border-line rounded-xl p-4 space-y-3">
@@ -151,11 +200,11 @@
           <div class="grid grid-cols-2 gap-2 text-center">
             <div class="bg-surface2/70 border border-line/60 rounded-lg p-2">
               <span class="block text-[10px] text-muted font-mono tracking-wider">LATITUDE</span>
-              <span id="latDisplay" class="text-xs font-mono font-bold text-[#EDEFF2]">—</span>
+              <span id="latDisplay" class="text-xs font-mono font-bold text-textMain">—</span>
             </div>
             <div class="bg-surface2/70 border border-line/60 rounded-lg p-2">
               <span class="block text-[10px] text-muted font-mono tracking-wider">LONGITUDE</span>
-              <span id="lngDisplay" class="text-xs font-mono font-bold text-[#EDEFF2]">—</span>
+              <span id="lngDisplay" class="text-xs font-mono font-bold text-textMain">—</span>
             </div>
           </div>
 
@@ -169,6 +218,10 @@
             <div id="gpsLinkDisplay" class="bg-surface2/70 border border-line/60 rounded-lg p-2.5 font-mono text-[11px] text-dz-green/90 break-all select-all min-h-[36px] flex items-center" dir="ltr">
               —
             </div>
+          </div>
+
+          <div id="mapBox" class="hidden rounded-xl overflow-hidden border border-line h-48 relative z-10 mt-2">
+            <div id="map" class="w-full h-full"></div>
           </div>
         </div>
       </div>
@@ -184,13 +237,13 @@
             <span>نسخ</span>
           </button>
         </div>
-        <textarea id="reportInput" dir="rtl" lang="ar" rows="3" placeholder="نقص في عملية الكنس داخل الملعب..." class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed"></textarea>
+        <textarea id="reportInput" dir="rtl" lang="ar" rows="3" placeholder="نقص في عملية الكنس داخل الملعب..." class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed text-textMain"></textarea>
       </div>
 
       <div class="grid grid-cols-2 gap-3 pt-1">
         <div>
           <label class="block text-[11px] text-muted mb-1.5 font-mono" dir="ltr">الصيغة</label>
-          <select id="formatSelect" dir="ltr" class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm">
+          <select id="formatSelect" dir="ltr" class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm text-textMain">
             <option value="jpeg">JPEG</option>
             <option value="png">PNG</option>
           </select>
@@ -263,6 +316,8 @@
   </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 (function(){
 "use strict";
@@ -270,48 +325,4 @@
 const state = { images:[], dt:new Date(), location:'', report:'', gps:null };
 const CW=1080, GRID_H=1080;
 
-const $=id=>document.getElementById(id);
-const fileInput=$('fileInput'), cameraInput=$('cameraInput'), thumbsEl=$('thumbs');
-const datetimeInput=$('datetimeInput'), nowBtn=$('nowBtn');
-const locationInput=$('locationInput'), gpsBtn=$('gpsBtn'), gpsBtnTxt=$('gpsBtnTxt'), gpsIcon=$('gpsIcon');
-const latDisplay=$('latDisplay'), lngDisplay=$('lngDisplay'), gpsLinkDisplay=$('gpsLinkDisplay'), copyGpsPanelBtn=$('copyGpsPanelBtn');
-const copyLocBtn=$('copyLocBtn'), reportInput=$('reportInput'), copyReportBtn=$('copyReportBtn');
-const formatSelect=$('formatSelect'), qualityWrap=$('qualityWrap'), qualityRange=$('qualityRange'), qualityVal=$('qualityVal');
-const canvas=$('reportCanvas');
-const downloadBtn=$('downloadBtn'), downloadBtnMobile=$('downloadBtnMobile');
-const waBtn=$('waBtn'), waBtnMobile=$('waBtnMobile');
-const resetBtn=$('resetBtn'), dimsLabel=$('dimsLabel');
-
-const pad2=n=>String(n).padStart(2,'0');
-const uid=()=>'id-'+Math.random().toString(36).slice(2)+Date.now().toString(36);
-const FR_M=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-
-function fmtDate(d){ return `${pad2(d.getDate())} ${FR_M[d.getMonth()]} ${d.getFullYear()}   ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; }
-function toInput(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
-
-/* ---- toast ---- */
-function toast(msg,bg='#1B2128'){
-  const el=document.createElement('div');
-  el.textContent=msg; el.setAttribute('dir','auto');
-  el.style.background=bg;
-  el.className='fixed top-4 left-1/2 -translate-x-1/2 z-[9999] border border-[#3a4452] text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-xl transition-opacity duration-300';
-  document.body.appendChild(el);
-  setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),300)},2400);
-}
-
-/* ---- copier ---- */
-function clip(text,btn){
-  if(!text || text === '—'){toast('لا يوجد نص نسخ');return;}
-  navigator.clipboard.writeText(text).then(()=>{
-    btn.classList.add('copied');
-    const span=btn.querySelector('span')||btn;
-    const prev=span.textContent;
-    span.textContent='✓ تم';
-    setTimeout(()=>{btn.classList.remove('copied');span.textContent=prev;},1800);
-    toast('✓ تم النسخ','#0E4D2A');
-  }).catch(()=>toast('تعذر النسخ تلقائياً'));
-}
-
-/* ---- images ---- */
-function addFiles(fl){
-  const files=Array.from(fl).filter(f=>f.type.startsWith('ima
+// Variables pour l'instance de carte L

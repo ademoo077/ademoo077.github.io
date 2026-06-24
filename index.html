@@ -449,7 +449,7 @@ gpsBtn.addEventListener('click',()=>{
 
 copyGpsPanelBtn.addEventListener('click',()=>{
   if(state.gps) {
-    clip(`https://maps.google.com/?q=$${state.gps.lat},${state.gps.lng}`, copyGpsPanelBtn);
+    clip(`https://maps.google.com/?q='${state.gps.lat},${state.gps.lng}`, copyGpsPanelBtn);
   } else {
     toast('الرجاء سحب إحداثيات GPS أولاً');
   }

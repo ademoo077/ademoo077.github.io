@@ -6,9 +6,11 @@
 <meta name="theme-color" content="#D2122E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="التقارير">
+<link rel="apple-touch-icon" href="logo wilaya.png">
+<link rel="icon" type="image/png" href="logo wilaya.png" sizes="192x192">
 <title>مولّد تقارير الميدان — وﻻية الجزائر</title>
 
-<link rel="preconnect" href="logo wilaya.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -607,14 +609,23 @@ function initPWA() {
   const manifest = {
     name: "مولّد تقارير الميدان",
     short_name: "التقارير",
+    description: "تطبيق لتوليد تقارير الميدان لولاية الجزائر",
     display: "standalone",
     start_url: ".",
     background_color: "#0A0C0F",
     theme_color: "#D2122E",
+    scope: "/",
+    orientation: "portrait-primary",
     icons: [{
       src: "logo wilaya.png",
       sizes: "192x192",
-      type: "image/png"
+      type: "image/png",
+      purpose: "any"
+    }, {
+      src: "logo wilaya.png",
+      sizes: "512x512",
+      type: "image/png",
+      purpose: "maskable"
     }]
   };
   const manifestLink = document.createElement('link');
@@ -625,9 +636,16 @@ function initPWA() {
   if ('serviceWorker' in navigator) {
     const swCode = `
       const CACHE_NAME = 'dz-rapport-v1';
+      const ASSETS = [location.href, 'logo wilaya.png'];
+      
       self.addEventListener('install', e => {
-        e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll([location.href])));
+        e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
       });
+      
+      self.addEventListener('activate', e => {
+        e.waitUntil(clients.claim());
+      });
+      
       self.addEventListener('fetch', e => {
         e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
       });

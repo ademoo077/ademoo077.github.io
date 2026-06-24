@@ -458,7 +458,7 @@ copyGpsPanelBtn.addEventListener('click',()=>{
 /* ---- copy loc / report ---- */
 copyLocBtn.addEventListener('click',()=>{
   let t=state.location;
-  if(state.gps) t+=`\nhttps://maps.google.com/?q=${state.gps.lat},${state.gps.lng}`;
+  if(state.gps) t+=`\nhttps://maps.google.com/?q='${state.gps.lat},${state.gps.lng}`;
   clip(t,copyLocBtn);
 });
 copyReportBtn.addEventListener('click',()=>clip(state.report,copyReportBtn));

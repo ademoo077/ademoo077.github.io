@@ -1,23 +1,24 @@
 {
-  "name": "مولّد تقارير الميدان — وﻻية الجزائر",
-  "short_name": "تقارير الميدان",
+  "name": "مولّد تقارير الميدان",
+  "short_name": "التقارير",
+  "description": "تطبيق لتوليد تقارير الميدان لولاية الجزائر",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#006633",
-  "orientation": "portrait",
+  "background_color": "#0A0C0F",
+  "theme_color": "#D2122E",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "logo.png",
+      "src": "logo wilaya.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "logo.png",
+      "src": "logo wilaya.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ]
 }

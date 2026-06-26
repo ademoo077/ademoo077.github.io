@@ -201,6 +201,7 @@
             </div>
           </div>
 
+
           <div class="space-y-1">
             <div class="flex items-center justify-between">
               <span class="text-[10px] text-muted font-mono">LIEN GOOGLE MAPS</span>
@@ -227,6 +228,17 @@
           </button>
         </div>
         <textarea id="reportInput" dir="rtl" lang="ar" rows="3" placeholder="نقص في عملية الكنس داخل الملعب..." class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm text-textMain"></textarea>
+      </div>
+
+      <div class="border border-dz-red/30 bg-dz-red/5 rounded-xl p-3 space-y-2">
+        <button id="instructionBtn" type="button" class="w-full rounded-lg bg-dz-red text-white text-sm font-bold py-2.5 hover:bg-dz-redD transition" dir="auto">
+          + تعليمات / نوع الحدث
+        </button>
+        <div id="instructionWrap" class="hidden">
+          <label class="block text-[11px] text-muted mb-1.5 font-mono" dir="ltr">INSTRUCTION / EVENT TYPE</label>
+          <textarea id="instructionInput" dir="rtl" lang="ar" rows="2" placeholder="مثال: مسار الركض الحضري" class="w-full bg-surface2 border border-line rounded-lg px-3 py-2.5 text-sm text-textMain"></textarea>
+          <p class="text-[10px] text-muted mt-1" dir="auto">سيظهر هذا النص داخل Bandeau أحمر في أعلى الصورة.</p>
+        </div>
       </div>
 
       <div class="grid grid-cols-2 gap-3 pt-1">
@@ -309,7 +321,7 @@
 (function(){
 "use strict";
 
-const state = { images:[], dt:new Date(), location:'', report:'', gps:null };
+const state = { images:[], dt:new Date(), location:'', report:'', instruction:'', gps:null };
 const CW=1080, GRID_H=1080;
 
 const $=id=>document.getElementById(id);
@@ -317,7 +329,7 @@ const fileInput=$('fileInput'), cameraInput=$('cameraInput'), thumbsEl=$('thumbs
 const datetimeInput=$('datetimeInput'), nowBtn=$('nowBtn');
 const locationInput=$('locationInput'), gpsBtn=$('gpsBtn'), gpsBtnTxt=$('gpsBtnTxt'), gpsIcon=$('gpsIcon');
 const latDisplay=$('latDisplay'), lngDisplay=$('lngDisplay'), gpsLinkDisplay=$('gpsLinkDisplay'), copyGpsPanelBtn=$('copyGpsPanelBtn');
-const copyLocBtn=$('copyLocBtn'), reportInput=$('reportInput'), copyReportBtn=$('copyReportBtn');
+const copyLocBtn=$('copyLocBtn'), reportInput=$('reportInput'), instructionBtn=$('instructionBtn'), instructionWrap=$('instructionWrap'), instructionInput=$('instructionInput'), copyReportBtn=$('copyReportBtn');
 const formatSelect=$('formatSelect'), qualityWrap=$('qualityWrap'), qualityRange=$('qualityRange'), qualityVal=$('qualityVal');
 const canvas=$('reportCanvas');
 const downloadBtn=$('downloadBtn'), downloadBtnMobile=$('downloadBtnMobile');
@@ -458,6 +470,7 @@ copyGpsPanelBtn.addEventListener('click',()=>{
   }
 });
 
+
 /* ---- copy loc / report ---- */
 copyLocBtn.addEventListener('click',()=>{
   let t=state.location;
@@ -503,6 +516,65 @@ function fitP(ctx,text,maxW,weight,maxL,sz0,szMin){
   while(sz>=szMin){ctx.font=`${weight} ${sz}px Cairo,sans-serif`;lines=wrap(ctx,text,maxW);if(lines.length<=maxL)break;sz-=2;}
   return{sz,lines};
 }
+function roundedRect(ctx,x,y,w,h,r){
+  const rr=Math.min(r,w/2,h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr,y);
+  ctx.lineTo(x+w-rr,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+rr);
+  ctx.lineTo(x+w,y+h-rr);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-rr,y+h);
+  ctx.lineTo(x+rr,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-rr);
+  ctx.lineTo(x,y+rr);
+  ctx.quadraticCurveTo(x,y,x+rr,y);
+  ctx.closePath();
+}
+function drawTopInstruction(ctx,text,W){
+  if(!text) return;
+
+  ctx.save();
+  ctx.direction='rtl';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+
+  const maxW=W-180;
+  const fitted=fitP(ctx,text,maxW,800,2,46,28);
+  const lines=fitted.lines;
+  const sz=fitted.sz;
+  const lineH=sz*1.32;
+  ctx.font=`800 ${sz}px Cairo,sans-serif`;
+
+  let longest=0;
+  for(const ln of lines) longest=Math.max(longest,ctx.measureText(ln).width);
+
+  const padX=46,padY=16;
+  const boxW=Math.min(W-120,Math.max(420,longest+padX*2));
+  const boxH=lines.length*lineH+padY*2;
+  const x=(W-boxW)/2,y=24;
+
+  ctx.shadowColor='rgba(0,0,0,.55)';
+  ctx.shadowBlur=14;
+  ctx.shadowOffsetY=4;
+  ctx.fillStyle='#D2122E';
+  roundedRect(ctx,x,y,boxW,boxH,4);
+  ctx.fill();
+
+  ctx.shadowBlur=0;
+  ctx.shadowOffsetY=0;
+  ctx.fillStyle='#fff';
+  ctx.strokeStyle='rgba(0,0,0,.45)';
+  ctx.lineWidth=6;
+  ctx.lineJoin='round';
+
+  let ty=y+padY+lineH/2;
+  for(const ln of lines){
+    ctx.strokeText(ln,W/2,ty);
+    ctx.fillText(ln,W/2,ty);
+    ty+=lineH;
+  }
+  ctx.restore();
+}
 async function drawComposite(){
   await ensureLoaded();
   const ctx=canvas.getContext('2d');
@@ -519,11 +591,19 @@ async function drawComposite(){
   bandH=Math.min(Math.max(bandH,160),650);
   canvas.width=CW;canvas.height=GRID_H+bandH;
   drawGrid(ctx,state.images.map(i=>i.img),CW,GRID_H);
+  const instructionRaw=state.instruction.trim();
+  drawTopInstruction(ctx,instructionRaw,CW);
+
   const dtTxt=fmtDate(state.dt);
   ctx.direction='ltr';ctx.font='italic 800 34px Cairo,sans-serif';
-  ctx.textAlign='left';ctx.textBaseline='top';
   ctx.lineJoin='round';ctx.lineWidth=7;ctx.strokeStyle='rgba(0,0,0,.55)';
-  ctx.strokeText(dtTxt,26,22);ctx.fillStyle='#fff';ctx.fillText(dtTxt,26,22);
+  if(instructionRaw){
+    ctx.textAlign='right';ctx.textBaseline='bottom';
+    ctx.strokeText(dtTxt,CW-26,GRID_H-22);ctx.fillStyle='#fff';ctx.fillText(dtTxt,CW-26,GRID_H-22);
+  } else {
+    ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.strokeText(dtTxt,26,22);ctx.fillStyle='#fff';ctx.fillText(dtTxt,26,22);
+  }
   ctx.fillStyle='#D2122E';ctx.fillRect(0,GRID_H,CW,bandH);
   ctx.direction='rtl';ctx.textAlign='center';ctx.textBaseline='top';
   let y=GRID_H+padT;
@@ -566,6 +646,7 @@ function buildCaption(){
   const d=state.dt;
   const dtStr=`${pad2(d.getDate())} ${FR_S[d.getMonth()]} ${d.getFullYear()} — ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
   let msg=`🗓️ ${dtStr}\n`;
+  if(state.instruction) msg+=`🏷️ ${state.instruction}\n`;
   if(state.location) msg+=`📍 الموقع: ${state.location}\n`;
   if(state.gps) msg+=`🗺️ https://maps.google.com/?q=${state.gps.lat},${state.gps.lng}\n`;
   if(state.report) msg+=`\n📋 ${state.report}`;
@@ -583,12 +664,17 @@ datetimeInput.addEventListener('input',e=>{if(e.target.value){state.dt=new Date(
 nowBtn.addEventListener('click',()=>{state.dt=new Date();datetimeInput.value=toInput(state.dt);scheduleRedraw();});
 locationInput.addEventListener('input',e=>{state.location=e.target.value;scheduleRedraw();});
 reportInput.addEventListener('input',e=>{state.report=e.target.value;scheduleRedraw();});
+instructionBtn.addEventListener('click',()=>{
+  instructionWrap.classList.toggle('hidden');
+  if(!instructionWrap.classList.contains('hidden')) instructionInput.focus();
+});
+instructionInput.addEventListener('input',e=>{state.instruction=e.target.value;scheduleRedraw();});
 formatSelect.addEventListener('change',()=>{const j=formatSelect.value==='jpeg';qualityWrap.style.opacity=j?'1':'.35';qualityRange.disabled=!j;});
 qualityRange.addEventListener('input',()=>{qualityVal.textContent=qualityRange.value+'%';});
 resetBtn.addEventListener('click',()=>{
   state.images.forEach(it=>it.url&&URL.revokeObjectURL(it.url));
-  state.images=[];state.location='';state.report='';state.gps=null;
-  locationInput.value='';reportInput.value='';
+  state.images=[];state.location='';state.report='';state.instruction='';state.gps=null;
+  locationInput.value='';reportInput.value='';instructionInput.value='';instructionWrap.classList.add('hidden');
   gpsBtnTxt.textContent='تحديد الموقع الحالي عبر GPS';
   latDisplay.textContent='—';lngDisplay.textContent='—';gpsLinkDisplay.textContent='—';
   const mapDiv = $('mapContainer');

@@ -1,29 +1,26 @@
-const CACHE_NAME = 'rapports-wilaya-v1';
-const urlsToCache = [
+const CACHE_NAME = 'dz-rapport-v1';
+const ASSETS = [
   './',
   './index.html',
-  './logo.png',
+  './logo wilaya.png',
   './manifest.json'
 ];
 
-// Installation du service worker et mise en cache des fichiers
-self.addEventListener('install', event => {
-  event.waitUntil(
+self.addEventListener('install', e => {
+  e.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Fichiers mis en cache avec succès');
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
-// Interception des requêtes pour fonctionner hors-ligne (Offline)
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Retourne le fichier en cache s'il existe, sinon le télécharge via le réseau
-        return response || fetch(event.request);
-      })
+self.addEventListener('activate', e => {
+  e.waitUntil(clients.claim());
+});
+
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request)
+      .then(res => res || fetch(e.request))
   );
 });

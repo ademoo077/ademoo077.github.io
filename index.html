@@ -83,7 +83,7 @@
   input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(0.5);opacity:.75}
   .dark input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:invert(1);}
   textarea:focus,input:focus,select:focus{outline:none;box-shadow:0 0 0 2px rgba(210,18,46,.45)}
-  input[type="range"]{accent-color:#D2122E}
+  input[type="range"]{accent-color:#D2122E; cursor:pointer;}
   canvas{image-rendering:auto}
   .copy-btn.copied{color:#0E8345!important;border-color:rgba(14,131,69,.4)!important}
 </style>
@@ -139,7 +139,7 @@
           <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
         </label>
       </div>
-      <div id="thumbs" class="grid grid-cols-4 gap-2"></div>
+      <div id="thumbs" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
     </div>
 
     <div class="bg-surface border border-line rounded-2xl p-4 sm:p-5 space-y-4 shadow-sm">
@@ -324,6 +324,158 @@
 const state = { images:[], dt:new Date(), location:'', report:'', instruction:'', gps:null };
 const CW=1080, GRID_H=1080;
 
+/* ---- Sauvegarde Hors-Ligne (IndexedDB) ---- */
+const DB_NAME = 'RapportTerrainDB';
+const STORE_NAME = 'drafts';
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
+
+function base64ToBlob(base64) {
+  const arr = base64.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while(n--) { u8arr[n] = bstr.charCodeAt(n); }
+  return new Blob([u8arr], {type:mime});
+async function saveDraft() {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    
+    // Convertir les nouvelles images en Base64 seulement si ce n'est pas encore fait
+    const imagesToSave = await Promise.all(state.images.map(async img => {
+      let b64 = img.base64;
+      if (!b64) {
+         b64 = await fileToBase64(img.file);
+         img.base64 = b64;
+      }
+      return {
+        id: img.id,
+        base64: b64,
+        brightness: img.brightness,
+        contrast: img.contrast
+      };
+    }));
+
+    const draftData = {
+      id: 'current_draft',
+      dt: state.dt.getTime(),
+      location: state.location,
+      report: state.report,
+      instruction: state.instruction,
+      gps: state.gps,
+      images: imagesToSave
+    };
+
+    store.put(draftData);
+  } catch (err) {
+    console.error("Erreur de sauvegarde hors-ligne", err);
+  }
+}
+
+async function loadDraft() {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.get('current_draft');
+    
+    request.onsuccess = () => {
+      const data = request.result;
+      if (data) {
+        state.dt = new Date(data.dt);
+        datetimeInput.value = toInput(state.dt);
+        
+        state.location = data.location || '';
+        locationInput.value = state.location;
+        
+        state.report = data.report || '';
+        reportInput.value = state.report;
+        
+        state.instruction = data.instruction || '';
+        instructionInput.value = state.instruction;
+        if(state.instruction) instructionWrap.classList.remove('hidden');
+        
+        state.gps = data.gps;
+        if(state.gps) {
+          latDisplay.textContent = state.gps.lat;
+          lngDisplay.textContent = state.gps.lng;
+          gpsBtnTxt.textContent='تحديث إحداثيات GPS';
+          
+          const mapDiv = $('mapContainer');
+          mapDiv.classList.remove('hidden');
+          
+          if (!map) {
+            map = L.map('mapContainer').setView([state.gps.lat, state.gps.lng], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              maxZoom: 19,
+              attribution: '© OpenStreetMap'
+            }).addTo(map);
+            mapMarker = L.marker([state.gps.lat, state.gps.lng]).addTo(map);
+          }
+        }
+
+        if(data.images && data.images.length > 0) {
+          data.images.forEach(imgData => {
+            const blob = base64ToBlob(imgData.base64);
+            const file = new File([blob], "image_restauree.jpg", { type: blob.type });
+            state.images.push({
+              id: imgData.id,
+              file: file,
+              url: URL.createObjectURL(file),
+              img: null,
+              brightness: imgData.brightness || 100,
+              contrast: imgData.contrast || 100,
+              base64: imgData.base64
+            });
+          });
+          renderThumbs();
+          updateBtns();
+        }
+        scheduleRedraw();
+        toast('تم استعادة التقرير المحفوظ تلقائياً', '#0E8345', '#fff'); // Brouillon restauré (Arabe)
+      }
+    };
+  } catch (err) {
+    console.error("Erreur de chargement du brouillon", err);
+  }
+}
+
+async function clearDraft() {
+  try {
+    const db = await openDB();
+    db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete('current_draft');
+  } catch (err) {
+    console.error("Erreur de suppression du brouillon", err);
+  }
+}
+
+/* ---- Fin Sauvegarde Hors-Ligne ---- */
+
+
 const $=id=>document.getElementById(id);
 const fileInput=$('fileInput'), cameraInput=$('cameraInput'), thumbsEl=$('thumbs');
 const datetimeInput=$('datetimeInput'), nowBtn=$('nowBtn');
@@ -373,32 +525,70 @@ function clip(text,btn){
     toast('✓ تم النسخ بنجاح', '#0E4D2A', '#fff');
   }).catch(()=>toast('تعذر النسخ تلقائياً'));
 }
-
 /* ---- images ---- */
 function addFiles(fl){
   const files=Array.from(fl).filter(f=>f.type.startsWith('image/'));
   if(!files.length) return;
   const rem=4-state.images.length;
   if(!rem){toast('الحد الأقصى 4 صور');return;}
-  files.slice(0,rem).forEach(f=>state.images.push({id:uid(),file:f,url:URL.createObjectURL(f),img:null}));
-  renderThumbs(); updateBtns(); scheduleRedraw();
+  files.slice(0,rem).forEach(f=>state.images.push({
+    id:uid(),file:f,url:URL.createObjectURL(f),img:null,
+    brightness: 100, contrast: 100, base64: null
+  }));
+  renderThumbs(); updateBtns(); scheduleRedraw(); saveDraft();
 }
 function removeImage(id){
   const it=state.images.find(i=>i.id===id);
   if(it?.url) URL.revokeObjectURL(it.url);
   state.images=state.images.filter(i=>i.id!==id);
-  renderThumbs(); updateBtns(); scheduleRedraw();
+  renderThumbs(); updateBtns(); scheduleRedraw(); saveDraft();
 }
 function renderThumbs(){
   thumbsEl.innerHTML='';
   state.images.forEach(it=>{
     const wrap=document.createElement('div');
-    wrap.className='relative aspect-square rounded-lg overflow-hidden border border-line bg-surface2';
+    wrap.className='relative rounded-lg border border-line bg-surface2 p-2 flex flex-col gap-2';
+    
+    const imgWrap=document.createElement('div');
+    imgWrap.className='relative aspect-square rounded-md overflow-hidden bg-black/10';
     const img=document.createElement('img'); img.src=it.url; img.className='w-full h-full object-cover';
+    img.style.filter = `brightness(${it.brightness}%) contrast(${it.contrast}%)`;
+    
     const btn=document.createElement('button'); btn.type='button'; btn.textContent='✕';
     btn.className='absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white text-[10px] flex items-center justify-center hover:bg-dz-red transition';
     btn.addEventListener('click',()=>removeImage(it.id));
-    wrap.append(img,btn); thumbsEl.appendChild(wrap);
+    imgWrap.append(img,btn);
+
+    const controlsWrap = document.createElement('div');
+    controlsWrap.className = 'flex flex-col gap-1 mt-1';
+    
+    // Luminosité
+    const bLabel = document.createElement('span'); bLabel.className = 'text-[9px] text-muted font-mono flex justify-between'; 
+    bLabel.innerHTML = `<span>إضاءة</span> <span id="b-val-${it.id}">${it.brightness}%</span>`;
+    const bInput = document.createElement('input'); bInput.type = 'range'; bInput.min = '50'; bInput.max = '150'; bInput.value = it.brightness; bInput.className = 'w-full h-1 mb-2';
+    bInput.addEventListener('input', (e) => { 
+        it.brightness = e.target.value; 
+        document.getElementById(`b-val-${it.id}`).textContent = `${it.brightness}%`;
+        img.style.filter = `brightness(${it.brightness}%) contrast(${it.contrast}%)`; 
+        scheduleRedraw(); 
+        saveDraft();
+    });
+    
+    // Contraste
+    const cLabel = document.createElement('span'); cLabel.className = 'text-[9px] text-muted font-mono flex justify-between'; 
+    cLabel.innerHTML = `<span>تباين</span> <span id="c-val-${it.id}">${it.contrast}%</span>`;
+    const cInput = document.createElement('input'); cInput.type = 'range'; cInput.min = '50'; cInput.max = '150'; cInput.value = it.contrast; cInput.className = 'w-full h-1';
+    cInput.addEventListener('input', (e) => { 
+        it.contrast = e.target.value; 
+        document.getElementById(`c-val-${it.id}`).textContent = `${it.contrast}%`;
+        img.style.filter = `brightness(${it.brightness}%) contrast(${it.contrast}%)`; 
+        scheduleRedraw(); 
+        saveDraft();
+    });
+
+    controlsWrap.append(bLabel, bInput, cLabel, cInput);
+    wrap.append(imgWrap, controlsWrap); 
+    thumbsEl.appendChild(wrap);
   });
 }
 function ensureLoaded(){
@@ -428,7 +618,7 @@ gpsBtn.addEventListener('click',()=>{
       latDisplay.textContent = lat;
       lngDisplay.textContent = lng;
       
-      const url=`https://maps.google.com/?q=${lat},${lng}`;
+      const url=`https://maps.google.com/?q=$${lat},${lng}`;
       gpsLinkDisplay.textContent = url;
       
       const mapDiv = $('mapContainer');
@@ -450,8 +640,9 @@ gpsBtn.addEventListener('click',()=>{
       if(!state.location){
         locationInput.value=`${lat}, ${lng}`;
         state.location=locationInput.value;
-        scheduleRedraw();
       }
+      scheduleRedraw();
+      saveDraft();
       toast(`📍 تم تحديد الإحداثيات بنجاح`, '#0E8345', '#fff');
     },
     err=>{
@@ -464,7 +655,7 @@ gpsBtn.addEventListener('click',()=>{
 
 copyGpsPanelBtn.addEventListener('click',()=>{
   if(state.gps) {
-    clip(`https://maps.google.com/?q=${state.gps.lat},${state.gps.lng}`, copyGpsPanelBtn);
+    clip(`https://maps.google.com/?q=$${state.gps.lat},${state.gps.lng}`, copyGpsPanelBtn);
   } else {
     toast('الرجاء سحب إحداثيات GPS أولاً');
   }
@@ -474,35 +665,40 @@ copyGpsPanelBtn.addEventListener('click',()=>{
 /* ---- copy loc / report ---- */
 copyLocBtn.addEventListener('click',()=>{
   let t=state.location;
-  if(state.gps) t+=`\nhttps://maps.google.com/?q=${state.gps.lat},${state.gps.lng}`;
+  if(state.gps) t+=`\nhttps://maps.google.com/?q=$${state.gps.lat},${state.gps.lng}`;
   clip(t,copyLocBtn);
 });
 copyReportBtn.addEventListener('click',()=>clip(state.report,copyReportBtn));
 
 /* ---- dessin ---- */
-function cover(ctx,img,x,y,w,h,g){
+function cover(ctx,imgObj,x,y,w,h,g){
+  const img = imgObj.img;
   const ix=x+g/2,iy=y+g/2,iw=w-g,ih=h-g;
   const sc=Math.max(iw/img.width,ih/img.height);
   const sw=iw/sc,sh=ih/sc,sx=(img.width-sw)/2,sy=(img.height-sh)/2;
+  
+  ctx.save();
+  ctx.filter = `brightness(${imgObj.brightness}%) contrast(${imgObj.contrast}%)`;
   ctx.drawImage(img,sx,sy,sw,sh,ix,iy,iw,ih);
+  ctx.restore();
 }
-function drawGrid(ctx,imgs,W,H){
+function drawGrid(ctx,imgsData,W,H){
   ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
-  if(!imgs.length){
+  if(!imgsData.length){
     ctx.fillStyle='#1B2128';ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#5b6573';ctx.direction='rtl';ctx.font='600 30px Cairo,sans-serif';
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('أضف صورة واحدة على الأقل للمعاينة',W/2,H/2);return;
   }
   const g=6;
-  if(imgs.length===1){cover(ctx,imgs[0],0,0,W,H,0);}
-  else if(imgs.length===2){cover(ctx,imgs[0],0,0,W/2,H,g);cover(ctx,imgs[1],W/2,0,W/2,H,g);}
-  else if(imgs.length===3){
-    cover(ctx,imgs[0],0,0,W,H*.56,g);
-    cover(ctx,imgs[1],0,H*.56,W/2,H*.44,g);cover(ctx,imgs[2],W/2,H*.56,W/2,H*.44,g);
+  if(imgsData.length===1){cover(ctx,imgsData[0],0,0,W,H,0);}
+  else if(imgsData.length===2){cover(ctx,imgsData[0],0,0,W/2,H,g);cover(ctx,imgsData[1],W/2,0,W/2,H,g);}
+  else if(imgsData.length===3){
+    cover(ctx,imgsData[0],0,0,W,H*.56,g);
+    cover(ctx,imgsData[1],0,H*.56,W/2,H*.44,g);cover(ctx,imgsData[2],W/2,H*.56,W/2,H*.44,g);
   } else {
-    cover(ctx,imgs[0],0,0,W/2,H/2,g);cover(ctx,imgs[1],W/2,0,W/2,H/2,g);
-    cover(ctx,imgs[2],0,H/2,W/2,H/2,g);cover(ctx,imgs[3],W/2,H/2,W/2,H/2,g);
+    cover(ctx,imgsData[0],0,0,W/2,H/2,g);cover(ctx,imgsData[1],W/2,0,W/2,H/2,g);
+    cover(ctx,imgsData[2],0,H/2,W/2,H/2,g);cover(ctx,imgsData[3],W/2,H/2,W/2,H/2,g);
   }
 }
 function wrap(ctx,text,maxW){
@@ -590,7 +786,9 @@ async function drawComposite(){
   let bandH=padT+locL.length*locH+gB+repL.length*repH+padB;
   bandH=Math.min(Math.max(bandH,160),650);
   canvas.width=CW;canvas.height=GRID_H+bandH;
-  drawGrid(ctx,state.images.map(i=>i.img),CW,GRID_H);
+  
+  drawGrid(ctx,state.images,CW,GRID_H);
+  
   const instructionRaw=state.instruction.trim();
   drawTopInstruction(ctx,instructionRaw,CW);
 
@@ -620,7 +818,6 @@ function updateBtns(){
   const ok=state.images.length>0;
   [downloadBtn,downloadBtnMobile,waBtn,waBtnMobile].forEach(b=>b.disabled=!ok);
 }
-
 /* ---- export ---- */
 async function download(){
   if(!state.images.length){toast('أضف صورة واحدة على الأقل');return;}
@@ -648,7 +845,7 @@ function buildCaption(){
   let msg=`🗓️ ${dtStr}\n`;
   if(state.instruction) msg+=`🏷️ ${state.instruction}\n`;
   if(state.location) msg+=`📍 الموقع: ${state.location}\n`;
-  if(state.gps) msg+=`🗺️ https://maps.google.com/?q=${state.gps.lat},${state.gps.lng}\n`;
+  if(state.gps) msg+=`🗺️ https://maps.google.com/?q=$${state.gps.lat},${state.gps.lng}\n`;
   if(state.report) msg+=`\n📋 ${state.report}`;
   return msg.trim();
 }
@@ -660,15 +857,15 @@ function shareWA(){
 /* ---- listeners ---- */
 fileInput.addEventListener('change',e=>{addFiles(e.target.files);fileInput.value='';});
 cameraInput.addEventListener('change',e=>{addFiles(e.target.files);cameraInput.value='';});
-datetimeInput.addEventListener('input',e=>{if(e.target.value){state.dt=new Date(e.target.value);scheduleRedraw();}});
-nowBtn.addEventListener('click',()=>{state.dt=new Date();datetimeInput.value=toInput(state.dt);scheduleRedraw();});
-locationInput.addEventListener('input',e=>{state.location=e.target.value;scheduleRedraw();});
-reportInput.addEventListener('input',e=>{state.report=e.target.value;scheduleRedraw();});
+datetimeInput.addEventListener('input',e=>{if(e.target.value){state.dt=new Date(e.target.value);scheduleRedraw();saveDraft();}});
+nowBtn.addEventListener('click',()=>{state.dt=new Date();datetimeInput.value=toInput(state.dt);scheduleRedraw();saveDraft();});
+locationInput.addEventListener('input',e=>{state.location=e.target.value;scheduleRedraw();saveDraft();});
+reportInput.addEventListener('input',e=>{state.report=e.target.value;scheduleRedraw();saveDraft();});
 instructionBtn.addEventListener('click',()=>{
   instructionWrap.classList.toggle('hidden');
   if(!instructionWrap.classList.contains('hidden')) instructionInput.focus();
 });
-instructionInput.addEventListener('input',e=>{state.instruction=e.target.value;scheduleRedraw();});
+instructionInput.addEventListener('input',e=>{state.instruction=e.target.value;scheduleRedraw();saveDraft();});
 formatSelect.addEventListener('change',()=>{const j=formatSelect.value==='jpeg';qualityWrap.style.opacity=j?'1':'.35';qualityRange.disabled=!j;});
 qualityRange.addEventListener('input',()=>{qualityVal.textContent=qualityRange.value+'%';});
 resetBtn.addEventListener('click',()=>{
@@ -679,7 +876,9 @@ resetBtn.addEventListener('click',()=>{
   latDisplay.textContent='—';lngDisplay.textContent='—';gpsLinkDisplay.textContent='—';
   const mapDiv = $('mapContainer');
   mapDiv.classList.add('hidden');
-  renderThumbs();updateBtns();scheduleRedraw();toast('تمت إعادة ضبط النموذج');
+  renderThumbs();updateBtns();scheduleRedraw();
+  clearDraft();
+  toast('تمت إعادة ضبط النموذج');
 });
 downloadBtn.addEventListener('click',download);
 downloadBtnMobile.addEventListener('click',download);
@@ -688,6 +887,7 @@ waBtnMobile.addEventListener('click',shareWA);
 
 /* ---- init ---- */
 datetimeInput.value=toInput(state.dt);
+loadDraft();
 updateBtns(); scheduleRedraw();
 if(document.fonts?.ready) document.fonts.ready.then(()=>scheduleRedraw());
 

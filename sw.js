@@ -2,7 +2,7 @@ const CACHE_NAME = 'dz-rapport-v1';
 const ASSETS = [
   './',
   './index.html',
-  './logo wilaya.png',
+  './logo.png',
   './manifest.json'
 ];
 

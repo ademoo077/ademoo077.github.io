@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="dark">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
@@ -86,6 +86,163 @@
   input[type="range"]{accent-color:#D2122E}
   canvas{image-rendering:auto}
   .copy-btn.copied{color:#0E8345!important;border-color:rgba(14,131,69,.4)!important}
+
+
+  /* ===== Professional Administrative UI ===== */
+  :root{
+    --color-ink:#f4f6fa;
+    --color-surface:#ffffff;
+    --color-surface2:#f8fafc;
+    --color-line:#d8dee8;
+    --color-muted:#64748b;
+    --color-text:#0f172a;
+    --official-red:#D2122E;
+    --official-red-dark:#A30E24;
+    --official-green:#0E8345;
+    --official-gold:#C89B2C;
+    --card-shadow:0 10px 30px rgba(15,23,42,.08);
+    --card-shadow-strong:0 18px 45px rgba(15,23,42,.12);
+  }
+  .dark{
+    --color-ink:#0f172a;
+    --color-surface:#151c27;
+    --color-surface2:#1d2633;
+    --color-line:#334155;
+    --color-muted:#94a3b8;
+    --color-text:#f8fafc;
+    --card-shadow:0 14px 38px rgba(0,0,0,.32);
+    --card-shadow-strong:0 22px 60px rgba(0,0,0,.42);
+  }
+  body{
+    background:
+      radial-gradient(circle at 10% -10%,rgba(210,18,46,.08),transparent 28%),
+      radial-gradient(circle at 90% 0%,rgba(14,131,69,.07),transparent 25%),
+      linear-gradient(180deg,var(--color-ink),var(--color-ink))!important;
+    letter-spacing:0;
+  }
+  header{
+    background:color-mix(in srgb,var(--color-surface) 96%, transparent)!important;
+    border-bottom:1px solid var(--color-line)!important;
+    box-shadow:0 6px 22px rgba(15,23,42,.06)!important;
+  }
+  .dark header{box-shadow:0 10px 26px rgba(0,0,0,.28)!important;}
+  header .stamp-ring{
+    border-radius:14px!important;
+    background:rgba(210,18,46,.08)!important;
+    box-shadow:0 0 0 1px rgba(210,18,46,.22)!important;
+  }
+  main{
+    gap:24px!important;
+  }
+  .bg-surface.border.border-line.rounded-2xl,
+  main section > .bg-surface,
+  section.lg\:sticky > .bg-surface{
+    background:var(--color-surface)!important;
+    border:1px solid var(--color-line)!important;
+    border-radius:18px!important;
+    box-shadow:var(--card-shadow)!important;
+  }
+  main section > .bg-surface:hover,
+  section.lg\:sticky > .bg-surface:hover{
+    box-shadow:var(--card-shadow-strong)!important;
+  }
+  h1,h2{letter-spacing:-.01em;}
+  .text-dz-red{color:var(--official-red)!important;}
+  .bg-dz-red{background:var(--official-red)!important;}
+  .hover\:bg-dz-redD:hover{background:var(--official-red-dark)!important;}
+  .border-dz-red\/50{border-color:rgba(210,18,46,.42)!important;}
+  span.w-7.h-7.rounded-full{
+    border-radius:10px!important;
+    background:rgba(210,18,46,.07)!important;
+    font-weight:800!important;
+  }
+  input:not([type='range']):not([type='file']),
+  textarea,
+  select{
+    background:var(--color-surface2)!important;
+    border:1px solid var(--color-line)!important;
+    border-radius:12px!important;
+    min-height:44px;
+    transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  textarea{line-height:1.8;}
+  input:not([type='range']):not([type='file']):focus,
+  textarea:focus,
+  select:focus{
+    border-color:rgba(210,18,46,.55)!important;
+    box-shadow:0 0 0 3px rgba(210,18,46,.14)!important;
+  }
+  label,.font-mono{letter-spacing:.02em;}
+  .dash-zone{
+    border:1.5px dashed rgba(100,116,139,.45)!important;
+    background:linear-gradient(180deg,var(--color-surface2),var(--color-surface))!important;
+    border-radius:14px!important;
+    min-height:110px;
+    transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+  }
+  .dash-zone:hover{
+    transform:translateY(-1px);
+    border-color:rgba(210,18,46,.62)!important;
+    box-shadow:0 10px 26px rgba(210,18,46,.10)!important;
+  }
+  button{
+    border-radius:12px!important;
+    font-weight:800!important;
+  }
+  #gpsBtn{
+    background:var(--official-green)!important;
+    box-shadow:0 10px 26px rgba(14,131,69,.18)!important;
+  }
+  #instructionBtn{
+    background:var(--official-red)!important;
+    box-shadow:0 10px 26px rgba(210,18,46,.18)!important;
+  }
+  #downloadBtn,#downloadBtnMobile{
+    background:var(--official-red)!important;
+    box-shadow:0 10px 25px rgba(210,18,46,.18)!important;
+  }
+  #downloadBtn:disabled,#downloadBtnMobile:disabled,
+  #waBtn:disabled,#waBtnMobile:disabled{
+    box-shadow:none!important;
+  }
+  #waBtn,#waBtnMobile{
+    border-color:rgba(14,131,69,.35)!important;
+    color:var(--official-green)!important;
+    background:rgba(14,131,69,.06)!important;
+  }
+  #mapContainer{
+    border-radius:14px!important;
+    overflow:hidden;
+  }
+  #thumbs > div{
+    border-radius:12px!important;
+    box-shadow:0 8px 20px rgba(15,23,42,.10)!important;
+  }
+  #reportCanvas{
+    border-radius:10px;
+    box-shadow:0 16px 40px rgba(15,23,42,.18)!important;
+  }
+  .rounded-xl.overflow-hidden.border.border-line.bg-black\/10,
+  .dark .rounded-xl.overflow-hidden.border.border-line.bg-black\/10{
+    background:#0b1220!important;
+    border:1px solid rgba(148,163,184,.25)!important;
+    border-radius:16px!important;
+    padding:12px;
+  }
+  .copy-btn{
+    background:var(--color-surface2)!important;
+    border-color:var(--color-line)!important;
+  }
+  .lg\:hidden.fixed.bottom-0{
+    background:color-mix(in srgb,var(--color-surface) 94%, transparent)!important;
+    backdrop-filter:blur(16px);
+    border-top:1px solid var(--color-line)!important;
+    box-shadow:0 -12px 30px rgba(15,23,42,.12)!important;
+  }
+  .text-muted{color:var(--color-muted)!important;}
+  .text-textMain{color:var(--color-text)!important;}
+  .leaflet-control-attribution{font-size:9px!important;}
+
 </style>
 </head>
 <body class="text-textMain min-h-screen pb-24 lg:pb-10">
@@ -99,7 +256,7 @@
       </svg>
     </div>
     <div class="leading-tight" dir="auto">
-      <h1 class="text-[15px] sm:text-base font-extrabold tracking-tight">مولّد تقارير الميدان</h1>
+      <h1 class="text-[15px] sm:text-base font-extrabold tracking-tight">منصة تقارير الميدان</h1>
       <p class="text-[11px] sm:text-xs text-muted font-mono" dir="ltr">Wilaya d'Alger · Contrôle de voirie</p>
     </div>
     <div class="ms-auto flex items-center gap-3">
@@ -116,6 +273,15 @@
 <main class="max-w-7xl mx-auto px-4 lg:px-8 py-6 grid lg:grid-cols-[460px_1fr] gap-6 items-start">
 
   <section class="space-y-5">
+    <div class="bg-surface border border-line rounded-2xl p-4 sm:p-5 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-dz-red/10 border border-dz-red/30 flex items-center justify-center text-dz-red font-black">✓</div>
+        <div>
+          <h2 class="font-extrabold text-sm sm:text-base" dir="auto">تقرير ميداني احترافي</h2>
+          <p class="text-xs text-muted mt-1" dir="auto">أدخل الصور، الموقع، التعليمات والوصف ثم صدّر التقرير بصيغة جاهزة للمشاركة.</p>
+        </div>
+      </div>
+    </div>
     <div class="bg-surface border border-line rounded-2xl p-4 sm:p-5 shadow-sm">
       <div class="flex items-center gap-2.5 mb-4">
         <span class="w-7 h-7 rounded-full border border-dz-red/50 text-dz-red text-xs font-mono font-bold flex items-center justify-center">01</span>
@@ -140,6 +306,54 @@
         </label>
       </div>
       <div id="thumbs" class="grid grid-cols-4 gap-2"></div>
+
+      <div id="imageEditPanel" class="hidden mt-4 rounded-xl border border-line bg-surface2/60 p-4 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-extrabold text-textMain" dir="auto">تحسين الصورة</h3>
+            <p class="text-[11px] text-muted" dir="auto">Recadrage rapide + luminosité/contraste قبل دمج الصور.</p>
+          </div>
+          <span class="text-[10px] font-mono text-dz-red bg-dz-red/10 border border-dz-red/25 rounded-full px-2 py-1" dir="ltr">BASIC EDIT</span>
+        </div>
+
+        <div>
+          <label class="block text-[11px] text-muted mb-1.5 font-mono" dir="ltr">IMAGE À MODIFIER</label>
+          <select id="imageSelect" dir="ltr" class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-textMain"></select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] text-muted mb-1.5 font-mono" dir="ltr">RECADRAGE</label>
+            <select id="cropSelect" dir="rtl" class="w-full bg-surface border border-line rounded-lg px-3 py-2.5 text-sm text-textMain">
+              <option value="center">وسط الصورة</option>
+              <option value="top">أعلى الصورة</option>
+              <option value="bottom">أسفل الصورة</option>
+              <option value="left">يسار الصورة</option>
+              <option value="right">يمين الصورة</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] text-muted mb-1.5 font-mono" dir="ltr">RESET</label>
+            <button id="resetImageEditBtn" type="button" class="w-full rounded-lg border border-line bg-surface text-muted text-sm font-bold py-2.5 hover:text-textMain hover:border-dz-red/40 transition" dir="auto">إعادة ضبط الصورة</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-[11px] text-muted font-mono" dir="ltr">LUMINOSITÉ</label>
+            <span id="brightnessVal" class="text-[11px] font-mono text-muted">100%</span>
+          </div>
+          <input id="brightnessRange" type="range" min="60" max="150" value="100" class="w-full">
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-[11px] text-muted font-mono" dir="ltr">CONTRASTE</label>
+            <span id="contrastVal" class="text-[11px] font-mono text-muted">100%</span>
+          </div>
+          <input id="contrastRange" type="range" min="60" max="160" value="100" class="w-full">
+        </div>
+      </div>
     </div>
 
     <div class="bg-surface border border-line rounded-2xl p-4 sm:p-5 space-y-4 shadow-sm">
@@ -293,6 +507,22 @@
           class="px-4 rounded-lg border border-line text-muted text-sm font-bold hover:text-textMain hover:border-dz-red/40 transition" dir="auto">↺</button>
       </div>
       <p class="text-[11px] text-muted font-mono mt-2 text-center" id="dimsLabel" dir="ltr">—</p>
+
+      <div class="mt-4 rounded-xl border border-line bg-surface2/60 p-3 space-y-3" dir="auto">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span id="networkDot" class="w-2.5 h-2.5 rounded-full bg-dz-green"></span>
+            <span id="networkStatus" class="text-xs font-bold text-textMain">Mode connecté</span>
+          </div>
+          <span id="draftStatus" class="text-[10px] text-muted font-mono" dir="ltr">IndexedDB Ready</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <button id="saveDraftBtn" type="button" class="rounded-lg bg-surface border border-line text-xs font-bold py-2 hover:border-dz-green/40 transition">حفظ المسودة</button>
+          <button id="restoreDraftBtn" type="button" class="rounded-lg bg-surface border border-line text-xs font-bold py-2 hover:border-dz-red/40 transition">استرجاع</button>
+          <button id="clearDraftBtn" type="button" class="rounded-lg bg-surface border border-line text-xs font-bold py-2 hover:border-dz-red/40 transition">مسح</button>
+        </div>
+        <p class="text-[10px] text-muted leading-relaxed" dir="auto">يتم حفظ المسودة محلياً حتى بدون إنترنت، ويتم تجهيز التقارير للمزامنة عند عودة الاتصال.</p>
+      </div>
     </div>
   </section>
 </main>
@@ -321,7 +551,7 @@
 (function(){
 "use strict";
 
-const state = { images:[], dt:new Date(), location:'', report:'', instruction:'', gps:null };
+const state = { images:[], dt:new Date(), location:'', report:'', instruction:'', gps:null, selectedImageId:null };
 const CW=1080, GRID_H=1080;
 
 const $=id=>document.getElementById(id);
@@ -330,6 +560,8 @@ const datetimeInput=$('datetimeInput'), nowBtn=$('nowBtn');
 const locationInput=$('locationInput'), gpsBtn=$('gpsBtn'), gpsBtnTxt=$('gpsBtnTxt'), gpsIcon=$('gpsIcon');
 const latDisplay=$('latDisplay'), lngDisplay=$('lngDisplay'), gpsLinkDisplay=$('gpsLinkDisplay'), copyGpsPanelBtn=$('copyGpsPanelBtn');
 const copyLocBtn=$('copyLocBtn'), reportInput=$('reportInput'), instructionBtn=$('instructionBtn'), instructionWrap=$('instructionWrap'), instructionInput=$('instructionInput'), copyReportBtn=$('copyReportBtn');
+const imageEditPanel=$('imageEditPanel'), imageSelect=$('imageSelect'), cropSelect=$('cropSelect'), brightnessRange=$('brightnessRange'), brightnessVal=$('brightnessVal'), contrastRange=$('contrastRange'), contrastVal=$('contrastVal'), resetImageEditBtn=$('resetImageEditBtn');
+const networkDot=$('networkDot'), networkStatus=$('networkStatus'), draftStatus=$('draftStatus'), saveDraftBtn=$('saveDraftBtn'), restoreDraftBtn=$('restoreDraftBtn'), clearDraftBtn=$('clearDraftBtn');
 const formatSelect=$('formatSelect'), qualityWrap=$('qualityWrap'), qualityRange=$('qualityRange'), qualityVal=$('qualityVal');
 const canvas=$('reportCanvas');
 const downloadBtn=$('downloadBtn'), downloadBtnMobile=$('downloadBtnMobile');
@@ -380,26 +612,66 @@ function addFiles(fl){
   if(!files.length) return;
   const rem=4-state.images.length;
   if(!rem){toast('الحد الأقصى 4 صور');return;}
-  files.slice(0,rem).forEach(f=>state.images.push({id:uid(),file:f,url:URL.createObjectURL(f),img:null}));
-  renderThumbs(); updateBtns(); scheduleRedraw();
+  files.slice(0,rem).forEach(f=>{
+    const id=uid();
+    state.images.push({id,file:f,url:URL.createObjectURL(f),img:null,brightness:100,contrast:100,crop:'center'});
+    if(!state.selectedImageId) state.selectedImageId=id;
+  });
+  renderThumbs(); updateImageEditor(); updateBtns(); scheduleRedraw(); scheduleDraftSave();
 }
 function removeImage(id){
   const it=state.images.find(i=>i.id===id);
   if(it?.url) URL.revokeObjectURL(it.url);
   state.images=state.images.filter(i=>i.id!==id);
-  renderThumbs(); updateBtns(); scheduleRedraw();
+  if(state.selectedImageId===id) state.selectedImageId=state.images[0]?.id||null;
+  renderThumbs(); updateImageEditor(); updateBtns(); scheduleRedraw(); scheduleDraftSave();
 }
 function renderThumbs(){
   thumbsEl.innerHTML='';
-  state.images.forEach(it=>{
+  state.images.forEach((it,idx)=>{
     const wrap=document.createElement('div');
-    wrap.className='relative aspect-square rounded-lg overflow-hidden border border-line bg-surface2';
-    const img=document.createElement('img'); img.src=it.url; img.className='w-full h-full object-cover';
+    wrap.className='relative aspect-square rounded-lg overflow-hidden border bg-surface2 cursor-pointer transition '+(it.id===state.selectedImageId?'border-dz-red ring-2 ring-dz-red/25':'border-line hover:border-dz-red/40');
+    wrap.title='Modifier cette image';
+    wrap.addEventListener('click',()=>selectImage(it.id));
+
+    const img=document.createElement('img');
+    img.src=it.url;
+    img.className='w-full h-full object-cover';
+    img.style.filter=`brightness(${it.brightness||100}%) contrast(${it.contrast||100}%)`;
+    img.style.objectPosition={center:'center',top:'center top',bottom:'center bottom',left:'left center',right:'right center'}[it.crop||'center'];
+
+    const badge=document.createElement('span');
+    badge.textContent=String(idx+1);
+    badge.className='absolute bottom-1 left-1 w-5 h-5 rounded-full bg-dz-red text-white text-[10px] font-bold flex items-center justify-center';
+
     const btn=document.createElement('button'); btn.type='button'; btn.textContent='✕';
     btn.className='absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white text-[10px] flex items-center justify-center hover:bg-dz-red transition';
-    btn.addEventListener('click',()=>removeImage(it.id));
-    wrap.append(img,btn); thumbsEl.appendChild(wrap);
+    btn.addEventListener('click',e=>{e.stopPropagation();removeImage(it.id);});
+
+    wrap.append(img,badge,btn); thumbsEl.appendChild(wrap);
   });
+}
+function currentImage(){return state.images.find(i=>i.id===state.selectedImageId)||state.images[0]||null;}
+function selectImage(id){
+  state.selectedImageId=id;
+  renderThumbs(); updateImageEditor();
+}
+function updateImageEditor(){
+  const has=state.images.length>0;
+  imageEditPanel.classList.toggle('hidden',!has);
+  if(!has) return;
+  if(!state.selectedImageId || !state.images.some(i=>i.id===state.selectedImageId)) state.selectedImageId=state.images[0].id;
+  const cur=currentImage();
+  imageSelect.innerHTML='';
+  state.images.forEach((it,idx)=>{
+    const opt=document.createElement('option');
+    opt.value=it.id; opt.textContent=`Image ${idx+1}`;
+    imageSelect.appendChild(opt);
+  });
+  imageSelect.value=cur.id;
+  cropSelect.value=cur.crop||'center';
+  brightnessRange.value=cur.brightness||100; brightnessVal.textContent=(cur.brightness||100)+'%';
+  contrastRange.value=cur.contrast||100; contrastVal.textContent=(cur.contrast||100)+'%';
 }
 function ensureLoaded(){
   return Promise.all(state.images.map(it=>{
@@ -410,6 +682,146 @@ function ensureLoaded(){
       img.onerror=rej; img.src=it.url;
     });
   }));
+}
+
+
+/* ---- Offline First : IndexedDB drafts & queued reports ---- */
+const DB_NAME='dz-field-report-offline-v2', DB_VERSION=1;
+let dbPromise=null, draftTimer=null;
+function openOfflineDB(){
+  if(!('indexedDB' in window)) return Promise.reject(new Error('IndexedDB unavailable'));
+  if(dbPromise) return dbPromise;
+  dbPromise=new Promise((resolve,reject)=>{
+    const req=indexedDB.open(DB_NAME,DB_VERSION);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains('drafts')) db.createObjectStore('drafts');
+      if(!db.objectStoreNames.contains('reports')) db.createObjectStore('reports',{keyPath:'id',autoIncrement:true});
+    };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+  return dbPromise;
+}
+async function idbStore(name,mode='readonly'){
+  const db=await openOfflineDB();
+  return db.transaction(name,mode).objectStore(name);
+}
+async function idbGet(store,key){
+  const s=await idbStore(store);
+  return new Promise((res,rej)=>{const r=s.get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});
+}
+async function idbPut(store,value,key){
+  const s=await idbStore(store,'readwrite');
+  return new Promise((res,rej)=>{const r=key!==undefined?s.put(value,key):s.put(value);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});
+}
+async function idbDelete(store,key){
+  const s=await idbStore(store,'readwrite');
+  return new Promise((res,rej)=>{const r=s.delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});
+}
+async function idbAll(store){
+  const s=await idbStore(store);
+  return new Promise((res,rej)=>{const r=s.getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);});
+}
+function formHasData(){return state.images.length||state.location||state.report||state.instruction||state.gps;}
+function snapshotDraft(includeImages=true){
+  return {
+    savedAt:new Date().toISOString(),
+    dt:state.dt.toISOString(),
+    location:state.location,
+    report:state.report,
+    instruction:state.instruction,
+    gps:state.gps,
+    format:formatSelect.value,
+    quality:qualityRange.value,
+    selectedImageId:state.selectedImageId,
+    images:includeImages?state.images.map(it=>({
+      id:it.id,
+      file:it.file,
+      name:it.file?.name||'image.jpg',
+      type:it.file?.type||'image/jpeg',
+      brightness:it.brightness||100,
+      contrast:it.contrast||100,
+      crop:it.crop||'center'
+    })):[]
+  };
+}
+async function saveDraft(show=false){
+  try{
+    if(!formHasData()) return;
+    await idbPut('drafts',snapshotDraft(true),'current');
+    draftStatus.textContent='Draft saved · '+new Date().toLocaleTimeString();
+    if(show) toast('✓ تم حفظ المسودة محلياً', '#0E8345', '#fff');
+  }catch(e){console.warn(e); if(show) toast('تعذر حفظ المسودة');}
+}
+function scheduleDraftSave(){
+  clearTimeout(draftTimer);
+  draftTimer=setTimeout(()=>saveDraft(false),700);
+}
+function applyDraft(draft,show=true){
+  if(!draft) return false;
+  state.images.forEach(it=>it.url&&URL.revokeObjectURL(it.url));
+  state.dt=draft.dt?new Date(draft.dt):new Date();
+  state.location=draft.location||'';
+  state.report=draft.report||'';
+  state.instruction=draft.instruction||'';
+  state.gps=draft.gps||null;
+  state.selectedImageId=draft.selectedImageId||null;
+  state.images=(draft.images||[]).filter(i=>i.file).map(i=>({
+    id:i.id||uid(),
+    file:i.file,
+    url:URL.createObjectURL(i.file),
+    img:null,
+    brightness:i.brightness||100,
+    contrast:i.contrast||100,
+    crop:i.crop||'center'
+  }));
+  datetimeInput.value=toInput(state.dt);
+  locationInput.value=state.location;
+  reportInput.value=state.report;
+  instructionInput.value=state.instruction;
+  instructionWrap.classList.toggle('hidden',!state.instruction);
+  if(draft.format) formatSelect.value=draft.format;
+  if(draft.quality){qualityRange.value=draft.quality;qualityVal.textContent=draft.quality+'%';}
+  if(state.gps){
+    latDisplay.textContent=state.gps.lat;lngDisplay.textContent=state.gps.lng;
+    gpsLinkDisplay.textContent=`https://maps.google.com/?q=${state.gps.lat},${state.gps.lng}`;
+  }else{latDisplay.textContent='—';lngDisplay.textContent='—';gpsLinkDisplay.textContent='—';}
+  renderThumbs(); updateImageEditor(); updateBtns(); scheduleRedraw();
+  if(show) toast('✓ تم استرجاع المسودة', '#0E8345', '#fff');
+  return true;
+}
+async function restoreDraft(show=true){
+  try{const d=await idbGet('drafts','current'); if(!d){if(show)toast('لا توجد مسودة محفوظة');return;} applyDraft(d,show);}catch(e){console.warn(e); if(show)toast('تعذر استرجاع المسودة');}
+}
+async function clearDraft(){
+  try{await idbDelete('drafts','current');draftStatus.textContent='No draft';toast('تم حذف المسودة');}catch(e){toast('تعذر حذف المسودة');}
+}
+async function saveReportOffline(blob,fmt){
+  try{
+    await idbPut('reports',{createdAt:new Date().toISOString(),synced:navigator.onLine,format:fmt,blob,meta:snapshotDraft(false)});
+    updateNetworkStatus();
+  }catch(e){console.warn('offline report save failed',e);}
+}
+async function syncOfflineReports(){
+  if(!navigator.onLine) return;
+  try{
+    const reports=await idbAll('reports');
+    const pending=reports.filter(r=>!r.synced);
+    for(const r of pending){r.synced=true;r.syncedAt=new Date().toISOString();await idbPut('reports',r);}
+    if(pending.length) toast(`✓ تمت مزامنة ${pending.length} تقرير محلياً`, '#0E8345', '#fff');
+    updateNetworkStatus();
+  }catch(e){console.warn(e);}
+}
+async function updateNetworkStatus(){
+  const online=navigator.onLine;
+  networkDot.className='w-2.5 h-2.5 rounded-full '+(online?'bg-dz-green':'bg-dz-red live-dot');
+  networkStatus.textContent=online?'Mode connecté':'Mode hors-ligne';
+  try{
+    const reports=await idbAll('reports');
+    const pending=reports.filter(r=>!r.synced).length;
+    draftStatus.textContent=pending?`${pending} rapport(s) en attente`:'Offline ready';
+  }catch(e){draftStatus.textContent='Offline storage ready';}
 }
 
 /* ---- GPS & Leaflet Map ---- */
@@ -453,6 +865,7 @@ gpsBtn.addEventListener('click',()=>{
         scheduleRedraw();
       }
       toast(`📍 تم تحديد الإحداثيات بنجاح`, '#0E8345', '#fff');
+      scheduleDraftSave();
     },
     err=>{
       gpsBtn.disabled=false; gpsIcon.classList.remove('spin'); gpsBtnTxt.textContent='تحديد الموقع الحالي عبر GPS';
@@ -480,29 +893,38 @@ copyLocBtn.addEventListener('click',()=>{
 copyReportBtn.addEventListener('click',()=>clip(state.report,copyReportBtn));
 
 /* ---- dessin ---- */
-function cover(ctx,img,x,y,w,h,g){
+function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
+function cover(ctx,it,x,y,w,h,g){
+  const img=it?.img;
+  if(!img) return;
   const ix=x+g/2,iy=y+g/2,iw=w-g,ih=h-g;
   const sc=Math.max(iw/img.width,ih/img.height);
-  const sw=iw/sc,sh=ih/sc,sx=(img.width-sw)/2,sy=(img.height-sh)/2;
+  const sw=iw/sc,sh=ih/sc;
+  const pos={center:[.5,.5],top:[.5,0],bottom:[.5,1],left:[0,.5],right:[1,.5]}[it.crop||'center']||[.5,.5];
+  const sx=clamp((img.width-sw)*pos[0],0,Math.max(0,img.width-sw));
+  const sy=clamp((img.height-sh)*pos[1],0,Math.max(0,img.height-sh));
+  ctx.save();
+  ctx.filter=`brightness(${it.brightness||100}%) contrast(${it.contrast||100}%)`;
   ctx.drawImage(img,sx,sy,sw,sh,ix,iy,iw,ih);
+  ctx.restore();
 }
-function drawGrid(ctx,imgs,W,H){
+function drawGrid(ctx,items,W,H){
   ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
-  if(!imgs.length){
+  if(!items.length){
     ctx.fillStyle='#1B2128';ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#5b6573';ctx.direction='rtl';ctx.font='600 30px Cairo,sans-serif';
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('أضف صورة واحدة على الأقل للمعاينة',W/2,H/2);return;
   }
   const g=6;
-  if(imgs.length===1){cover(ctx,imgs[0],0,0,W,H,0);}
-  else if(imgs.length===2){cover(ctx,imgs[0],0,0,W/2,H,g);cover(ctx,imgs[1],W/2,0,W/2,H,g);}
-  else if(imgs.length===3){
-    cover(ctx,imgs[0],0,0,W,H*.56,g);
-    cover(ctx,imgs[1],0,H*.56,W/2,H*.44,g);cover(ctx,imgs[2],W/2,H*.56,W/2,H*.44,g);
+  if(items.length===1){cover(ctx,items[0],0,0,W,H,0);}
+  else if(items.length===2){cover(ctx,items[0],0,0,W/2,H,g);cover(ctx,items[1],W/2,0,W/2,H,g);}
+  else if(items.length===3){
+    cover(ctx,items[0],0,0,W,H*.56,g);
+    cover(ctx,items[1],0,H*.56,W/2,H*.44,g);cover(ctx,items[2],W/2,H*.56,W/2,H*.44,g);
   } else {
-    cover(ctx,imgs[0],0,0,W/2,H/2,g);cover(ctx,imgs[1],W/2,0,W/2,H/2,g);
-    cover(ctx,imgs[2],0,H/2,W/2,H/2,g);cover(ctx,imgs[3],W/2,H/2,W/2,H/2,g);
+    cover(ctx,items[0],0,0,W/2,H/2,g);cover(ctx,items[1],W/2,0,W/2,H/2,g);
+    cover(ctx,items[2],0,H/2,W/2,H/2,g);cover(ctx,items[3],W/2,H/2,W/2,H/2,g);
   }
 }
 function wrap(ctx,text,maxW){
@@ -590,7 +1012,7 @@ async function drawComposite(){
   let bandH=padT+locL.length*locH+gB+repL.length*repH+padB;
   bandH=Math.min(Math.max(bandH,160),650);
   canvas.width=CW;canvas.height=GRID_H+bandH;
-  drawGrid(ctx,state.images.map(i=>i.img),CW,GRID_H);
+  drawGrid(ctx,state.images,CW,GRID_H);
   const instructionRaw=state.instruction.trim();
   drawTopInstruction(ctx,instructionRaw,CW);
 
@@ -636,6 +1058,7 @@ async function download(){
     a.href=URL.createObjectURL(blob);
     document.body.appendChild(a);a.click();a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    saveReportOffline(blob,fmt);
     toast('✓ تم حفظ الصورة', '#0E8345', '#fff');
   },mime,q);
 }
@@ -660,26 +1083,36 @@ function shareWA(){
 /* ---- listeners ---- */
 fileInput.addEventListener('change',e=>{addFiles(e.target.files);fileInput.value='';});
 cameraInput.addEventListener('change',e=>{addFiles(e.target.files);cameraInput.value='';});
-datetimeInput.addEventListener('input',e=>{if(e.target.value){state.dt=new Date(e.target.value);scheduleRedraw();}});
-nowBtn.addEventListener('click',()=>{state.dt=new Date();datetimeInput.value=toInput(state.dt);scheduleRedraw();});
-locationInput.addEventListener('input',e=>{state.location=e.target.value;scheduleRedraw();});
-reportInput.addEventListener('input',e=>{state.report=e.target.value;scheduleRedraw();});
+datetimeInput.addEventListener('input',e=>{if(e.target.value){state.dt=new Date(e.target.value);scheduleRedraw();scheduleDraftSave();}});
+nowBtn.addEventListener('click',()=>{state.dt=new Date();datetimeInput.value=toInput(state.dt);scheduleRedraw();scheduleDraftSave();});
+locationInput.addEventListener('input',e=>{state.location=e.target.value;scheduleRedraw();scheduleDraftSave();});
+reportInput.addEventListener('input',e=>{state.report=e.target.value;scheduleRedraw();scheduleDraftSave();});
 instructionBtn.addEventListener('click',()=>{
   instructionWrap.classList.toggle('hidden');
   if(!instructionWrap.classList.contains('hidden')) instructionInput.focus();
 });
-instructionInput.addEventListener('input',e=>{state.instruction=e.target.value;scheduleRedraw();});
-formatSelect.addEventListener('change',()=>{const j=formatSelect.value==='jpeg';qualityWrap.style.opacity=j?'1':'.35';qualityRange.disabled=!j;});
-qualityRange.addEventListener('input',()=>{qualityVal.textContent=qualityRange.value+'%';});
+instructionInput.addEventListener('input',e=>{state.instruction=e.target.value;scheduleRedraw();scheduleDraftSave();});
+imageSelect.addEventListener('change',e=>selectImage(e.target.value));
+cropSelect.addEventListener('change',e=>{const it=currentImage();if(!it)return;it.crop=e.target.value;renderThumbs();scheduleRedraw();scheduleDraftSave();});
+brightnessRange.addEventListener('input',e=>{const it=currentImage();if(!it)return;it.brightness=Number(e.target.value);brightnessVal.textContent=it.brightness+'%';renderThumbs();scheduleRedraw();scheduleDraftSave();});
+contrastRange.addEventListener('input',e=>{const it=currentImage();if(!it)return;it.contrast=Number(e.target.value);contrastVal.textContent=it.contrast+'%';renderThumbs();scheduleRedraw();scheduleDraftSave();});
+resetImageEditBtn.addEventListener('click',()=>{const it=currentImage();if(!it)return;it.crop='center';it.brightness=100;it.contrast=100;updateImageEditor();renderThumbs();scheduleRedraw();scheduleDraftSave();toast('تمت إعادة ضبط تعديل الصورة');});
+saveDraftBtn.addEventListener('click',()=>saveDraft(true));
+restoreDraftBtn.addEventListener('click',()=>restoreDraft(true));
+clearDraftBtn.addEventListener('click',clearDraft);
+window.addEventListener('online',()=>{updateNetworkStatus();syncOfflineReports();});
+window.addEventListener('offline',updateNetworkStatus);
+formatSelect.addEventListener('change',()=>{const j=formatSelect.value==='jpeg';qualityWrap.style.opacity=j?'1':'.35';qualityRange.disabled=!j;scheduleDraftSave();});
+qualityRange.addEventListener('input',()=>{qualityVal.textContent=qualityRange.value+'%';scheduleDraftSave();});
 resetBtn.addEventListener('click',()=>{
   state.images.forEach(it=>it.url&&URL.revokeObjectURL(it.url));
-  state.images=[];state.location='';state.report='';state.instruction='';state.gps=null;
+  state.images=[];state.location='';state.report='';state.instruction='';state.gps=null;state.selectedImageId=null;
   locationInput.value='';reportInput.value='';instructionInput.value='';instructionWrap.classList.add('hidden');
   gpsBtnTxt.textContent='تحديد الموقع الحالي عبر GPS';
   latDisplay.textContent='—';lngDisplay.textContent='—';gpsLinkDisplay.textContent='—';
   const mapDiv = $('mapContainer');
   mapDiv.classList.add('hidden');
-  renderThumbs();updateBtns();scheduleRedraw();toast('تمت إعادة ضبط النموذج');
+  renderThumbs();updateImageEditor();updateBtns();scheduleRedraw();clearDraft();toast('تمت إعادة ضبط النموذج');
 });
 downloadBtn.addEventListener('click',download);
 downloadBtnMobile.addEventListener('click',download);
@@ -688,28 +1121,28 @@ waBtnMobile.addEventListener('click',shareWA);
 
 /* ---- init ---- */
 datetimeInput.value=toInput(state.dt);
-updateBtns(); scheduleRedraw();
+updateBtns(); updateImageEditor(); updateNetworkStatus(); restoreDraft(false); scheduleRedraw();
 if(document.fonts?.ready) document.fonts.ready.then(()=>scheduleRedraw());
 
-/* ---- PWA : Manifest & Service Worker virtuels ---- */
+/* ---- PWA : Manifest & Service Worker ---- */
 function initPWA() {
   const manifest = {
     name: "مولّد تقارير الميدان",
     short_name: "التقارير",
     description: "تطبيق لتوليد تقارير الميدان لولاية الجزائر",
     display: "standalone",
-    start_url: ".",
+    start_url: "./index.html",
     background_color: "#0A0C0F",
     theme_color: "#D2122E",
-    scope: "/",
+    scope: "./",
     orientation: "portrait-primary",
     icons: [{
-      src: "logo wilaya.png",
+      src: "logo.png",
       sizes: "192x192",
       type: "image/png",
       purpose: "any"
     }, {
-      src: "logo wilaya.png",
+      src: "logo.png",
       sizes: "512x512",
       type: "image/png",
       purpose: "maskable"
@@ -721,26 +1154,7 @@ function initPWA() {
   document.head.appendChild(manifestLink);
 
   if ('serviceWorker' in navigator) {
-    const swCode = `
-      const CACHE_NAME = 'dz-rapport-v1';
-      const ASSETS = [location.href, 'logo wilaya.png'];
-      
-      self.addEventListener('install', e => {
-        e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
-      });
-      
-      self.addEventListener('activate', e => {
-        e.waitUntil(clients.claim());
-      });
-      
-      self.addEventListener('fetch', e => {
-        e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
-      });
-    `;
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
-    
-    navigator.serviceWorker.register(swUrl).catch(err => console.error("PWA Erreur:", err));
+    navigator.serviceWorker.register('./sw.js').catch(err => console.error('PWA Erreur:', err));
   }
 }
 initPWA();
